@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --sun:#FBBF24; --sun-lt:#FEF3C7; --sun-dk:#D97706;
+  --gold:#F59E0B;
+  --leaf:#22C55E; --leaf-lt:#DCFCE7; --leaf-dk:#15803D;
+  --coral:#F97316; --coral-lt:#FFEDD5;
+  --red:#EF4444; --red-lt:#FEE2E2;
+  --purple:#8B5CF6; --purple-lt:#EDE9FE;
+  --bg:#FFFBEB; --surface:#fff;
+  --sidebar:#1A0E00; --sidebar-hover:rgba(251,191,36,.08); --sidebar-active:#3D2400;
+  --text:#1C1000; --muted:#78716C; --border:rgba(0,0,0,.07);
+  --r:20px; --r-sm:12px; --r-xs:8px;
+  --sh:0 2px 12px rgba(0,0,0,.07);
+  --sh-md:0 6px 24px rgba(0,0,0,.1);
+  --sh-lg:0 12px 44px rgba(0,0,0,.14);
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box }
+::-webkit-scrollbar { width:5px }
+::-webkit-scrollbar-thumb { background:rgba(0,0,0,.12); border-radius:3px }
+body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden }
+/* #app is the flex row container that replaces body's original flex role */
+#app { display:flex; height:100vh; overflow:hidden; width:100% }
+
+/* ── MAIN ── */
+.main { flex:1; overflow-y:auto; height:100vh }
+.section { display:none; padding:28px 32px; min-height:100%; animation:fadeUp .28s ease }
+.section.active { display:block }
+.sec-head { margin-bottom:24px }
+.sec-head h1 { font-family:'Fredoka One',cursive; font-size:32px; line-height:1.1 }
+.sec-head p { color:var(--muted); font-size:14px; font-weight:700; margin-top:3px }
+
+/* ── CARDS ── */
+.card { background:var(--surface); border-radius:var(--r); padding:22px; box-shadow:var(--sh) }
+.widget-title { font-family:'Fredoka One',cursive; font-size:17px; margin-bottom:14px; display:flex; align-items:center; gap:7px }
+
+/* ── FORMS ── */
+.fg { display:flex; flex-direction:column; gap:5px; flex:1; min-width:120px }
+.fg label { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.07em; color:var(--muted) }
+.form-row { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap }
+input[type=text],input[type=date],input[type=number],textarea,select {
+  font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; padding:9px 12px;
+  border:2px solid rgba(0,0,0,.09); border-radius:var(--r-sm); background:#FAFAF5;
+  color:var(--text); outline:none; transition:border-color .18s,box-shadow .18s; width:100%
+}
+input:focus,textarea:focus,select:focus {
+  border-color:var(--sun); box-shadow:0 0 0 3px rgba(251,191,36,.15)
+}
+
+/* ── BUTTONS ── */
+.btn { font-family:'Nunito',sans-serif; font-weight:900; font-size:14px; padding:9px 18px; border:none; border-radius:var(--r-sm); cursor:pointer; transition:all .18s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
+.btn-sun  { background:var(--sun); color:#1A0E00 }
+.btn-sun:hover  { background:var(--gold); transform:translateY(-2px); box-shadow:0 4px 14px rgba(251,191,36,.4) }
+.btn-leaf { background:var(--leaf); color:#fff }
+.btn-leaf:hover { background:var(--leaf-dk); transform:translateY(-2px); box-shadow:0 4px 14px rgba(34,197,94,.35) }
+.btn-red  { background:var(--red); color:#fff }
+.btn-red:hover  { background:#DC2626; transform:translateY(-2px) }
+.btn-ghost { background:rgba(0,0,0,.05); color:var(--muted) }
+.btn-ghost:hover { background:rgba(0,0,0,.09); color:var(--text) }
+
+/* ── FILTER TABS ── */
+.ftabs { display:flex; gap:3px; background:rgba(0,0,0,.05); border-radius:11px; padding:4px; width:fit-content; margin-bottom:15px }
+.ftab { padding:6px 15px; border-radius:8px; font-size:12px; font-weight:900; border:none; background:transparent; color:var(--muted); cursor:pointer; font-family:'Nunito',sans-serif; transition:all .18s }
+.ftab.active { background:#fff; color:var(--text); box-shadow:var(--sh) }
+
+/* ── BADGE ── */
+.badge { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:20px; white-space:nowrap }
+.b-high   { background:#FEE2E2; color:#DC2626 }
+.b-medium { background:#FEF3C7; color:#B45309 }
+.b-low    { background:#DCFCE7; color:#15803D }
+
+/* ── MODALS ── */
+.overlay { position:fixed; inset:0; background:rgba(26,14,0,.45); backdrop-filter:blur(5px); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .22s }
+.overlay.open { opacity:1; pointer-events:all }
+.modal { background:#fff; border-radius:var(--r); width:92%; max-width:540px; max-height:90vh; overflow-y:auto; padding:26px; transform:scale(.94) translateY(12px); transition:transform .22s; box-shadow:0 24px 70px rgba(0,0,0,.2) }
+.overlay.open .modal { transform:scale(1) translateY(0) }
+.modal-head { font-family:'Fredoka One',cursive; font-size:21px; margin-bottom:15px }
+.modal textarea { min-height:160px; resize:vertical }
+.modal-foot { display:flex; justify-content:flex-end; gap:10px; margin-top:14px }
+
+/* ── EMPTY STATE ── */
+.empty { text-align:center; padding:48px 20px; color:var(--muted) }
+.empty .ee { font-size:48px; display:block; margin-bottom:9px }
+.empty h3 { font-family:'Fredoka One',cursive; font-size:20px; color:var(--text); margin-bottom:4px }
+.empty p { font-size:13px; font-weight:700 }
+
+/* ── CONFETTI ── */
+.conf { position:fixed; pointer-events:none; z-index:9999; border-radius:2px; animation:cfall 1s ease-out forwards }
+
+/* ── BOTTOM NAV ── */
+.bnav { display:none; position:fixed; bottom:0; left:0; right:0; background:var(--sidebar); border-top:1px solid rgba(255,255,255,.06); z-index:100; padding-bottom:env(safe-area-inset-bottom,0) }
+.bnav-inner { display:flex }
+.bnav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:9px 4px 10px; border:none; background:none; cursor:pointer; color:rgba(255,255,255,.38); font-family:'Nunito',sans-serif; font-size:9.5px; font-weight:800; letter-spacing:.02em; transition:color .18s }
+.bnav-btn.active { color:var(--sun) }
+.bnav-btn .bi { font-size:19px; line-height:1 }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes cfall   { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(70px) rotate(700deg);opacity:0} }
+@keyframes ldotPulse { 0%,100%{transform:scale(1.4)} 50%{transform:scale(1.1)} }
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px) {
+  .stats-row { grid-template-columns:1fr 1fr }
+  .dash-grid { grid-template-columns:1fr }
+  .section { padding:22px 20px }
+}
+@media(max-width:600px) {
+  .bnav { display:block }
+  .main { padding-bottom:65px }
+  .section { padding:18px 15px }
+  .stats-row { grid-template-columns:1fr 1fr; gap:9px }
+  .dash-grid { grid-template-columns:1fr; gap:12px }
+  .form-row { flex-direction:column }
+  .sec-head h1 { font-size:26px }
+  .modal { padding:20px 16px }
+}
+@media(max-width:360px) { .bnav-btn { font-size:8px } }

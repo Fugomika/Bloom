@@ -1,0 +1,18 @@
+{
+  "name": "Bloom — Personal Dashboard",
+  "short_name": "Bloom",
+  "description": "Tasks, habits, calories, workouts & notes — all in one place",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFFBEB",
+  "theme_color": "#1A0E00",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
