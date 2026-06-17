@@ -99,7 +99,8 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
     </template>
 
     <!-- Modal -->
-    <div class="overlay" :class="{ open: showModal }" @click.self="closeModal">
+    <div class="overlay" :class="{ open: showModal }" @click.self="closeModal"
+      @keydown="e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveMeal() }">
       <div class="modal">
         <div class="modal-head">Log Food 🥗</div>
         <div class="form-row">

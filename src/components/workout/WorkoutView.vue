@@ -96,7 +96,8 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
     </template>
 
     <!-- Modal -->
-    <div class="overlay" :class="{ open: showModal }" @click.self="closeModal">
+    <div class="overlay" :class="{ open: showModal }" @click.self="closeModal"
+      @keydown="e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveWorkout() }">
       <div class="modal" style="max-width:580px">
         <div class="modal-head">Log Workout 💪</div>
         <div class="fg" style="margin-bottom:14px">

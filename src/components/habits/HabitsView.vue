@@ -4,12 +4,12 @@ import { DB, save } from '../../composables/useStore.js'
 import { uid, today, streak, last7 } from '../../utils/date.js'
 import { confetti } from '../../composables/useConfetti.js'
 import { EMOJIS, DLBL } from '../../utils/constants.js'
+import EmojiPicker from '../ui/EmojiPicker.vue'
 
 const hInput = ref('')
 const hColor = ref('pink')
 const selEmoji = ref(EMOJIS[0])
 
-function pickEmoji(e) { selEmoji.value = e }
 function addHabit() {
   if (!hInput.value.trim()) return
   DB.habits.push({ id: uid(), name: hInput.value.trim(), emoji: selEmoji.value, color: hColor.value, ins: [], at: Date.now() })
@@ -52,9 +52,7 @@ const w = last7()
       </div>
       <div class="fg" style="margin-bottom:12px">
         <label>Emoji</label>
-        <div class="emoji-grid">
-          <div v-for="e in EMOJIS" :key="e" class="em-opt" :class="{ on: selEmoji === e }" @click="pickEmoji(e)">{{ e }}</div>
-        </div>
+        <EmojiPicker :emojis="EMOJIS" v-model="selEmoji" variant="habit" />
       </div>
       <button class="btn btn-sun" @click="addHabit">＋ Add Habit</button>
     </div>
@@ -108,10 +106,6 @@ const w = last7()
 .cin-btn { width:100%; padding:8px; border-radius:9px; border:2.5px solid rgba(0,0,0,.1); background:transparent; font-family:'Nunito',sans-serif; font-weight:900; font-size:12.5px; cursor:pointer; transition:all .18s; color:var(--text) }
 .habit-del { background:none; border:none; cursor:pointer; font-size:13px; color:#D1D5DB; padding:4px; border-radius:6px; transition:all .15s; flex-shrink:0 }
 .habit-del:hover { background:#FEE2E2; color:#DC2626 }
-.emoji-grid { display:flex; flex-wrap:wrap; gap:5px; margin-top:5px }
-.em-opt { width:36px; height:36px; border-radius:8px; border:2px solid transparent; background:var(--bg); font-size:18px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center }
-.em-opt:hover, .em-opt.on { border-color:var(--sun); background:var(--sun-lt) }
-
 /* habit color themes */
 .hc-purple .h-emoji-wrap { background:#EDE9FE } .hc-purple .dot.on { background:#8B5CF6 } .hc-purple .cin-btn.on { background:#8B5CF6;border-color:#8B5CF6;color:#fff } .hc-purple .cin-btn:hover:not(.on) { border-color:#8B5CF6;color:#8B5CF6;background:#EDE9FE }
 .hc-pink   .h-emoji-wrap { background:var(--sun-lt) } .hc-pink   .dot.on { background:var(--sun) } .hc-pink   .cin-btn.on { background:var(--sun);border-color:var(--sun);color:#1A0E00 } .hc-pink   .cin-btn:hover:not(.on) { border-color:var(--sun);color:var(--sun-dk);background:var(--sun-lt) }

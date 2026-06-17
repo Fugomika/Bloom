@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { DB, save } from '../../composables/useStore.js'
 import { uid, fmtYM, fmtDateShort, eventDuration } from '../../utils/date.js'
 import { MONTHS, EVT_EMOJIS, EVT_COLORS } from '../../utils/constants.js'
+import EmojiPicker from '../ui/EmojiPicker.vue'
 
 // ── State ──────────────────────────────────────────────────
 const activeCalId = ref(null)
@@ -31,7 +32,8 @@ const selEvtColor  = ref(EVT_COLORS[0])
 const showEvtEmojiGrid = ref(false)
 
 // ── Helpers ────────────────────────────────────────────────
-function getCal() { return (DB.lifeCalendars || []).find(c => c.id === activeCalId.value) }
+const activeCal = computed(() => (DB.lifeCalendars || []).find(c => c.id === activeCalId.value))
+function getCal() { return activeCal.value }
 
 function dotToYM(idx) {
   const cal = getCal(); if (!cal) return ''
@@ -280,10 +282,10 @@ const calYearRange = computed(() => {
     </div>
 
     <!-- GRID VIEW -->
-    <div v-else-if="getCal()">
+    <div v-else-if="activeCal">
       <div class="life-breadcrumb">
         <button class="btn btn-ghost" style="font-size:12px;padding:5px 12px" @click="backToList">← Back</button>
-        <div style="font-family:'Fredoka One',cursive;font-size:20px;flex:1">{{ getCal().emoji }} {{ getCal().name }}</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:20px;flex:1">{{ activeCal.emoji }} {{ activeCal.name }}</div>
         <button class="btn btn-ghost" style="font-size:12px;padding:5px 12px" @click="openCalModal(activeCalId)">✏️ Edit</button>
       </div>
 
@@ -393,8 +395,8 @@ const calYearRange = computed(() => {
             <div style="font-size:26px;cursor:pointer;padding:6px;background:var(--bg);border-radius:var(--r-sm);text-align:center;border:2px solid rgba(0,0,0,.09)" @click="showCalEmojiGrid = !showCalEmojiGrid">{{ selCalEmoji }}</div>
           </div>
         </div>
-        <div v-if="showCalEmojiGrid" class="eemoji-grid" style="margin-bottom:10px">
-          <div v-for="e in EVT_EMOJIS" :key="e" class="eemoji" :class="{ on: selCalEmoji === e }" @click="selCalEmoji = e; showCalEmojiGrid = false">{{ e }}</div>
+        <div v-if="showCalEmojiGrid" style="margin-bottom:10px">
+          <EmojiPicker :emojis="EVT_EMOJIS" v-model="selCalEmoji" @update:modelValue="showCalEmojiGrid = false" />
         </div>
         <div class="fg" style="margin-bottom:12px">
           <label>Color</label>
@@ -425,8 +427,8 @@ const calYearRange = computed(() => {
             <div style="font-size:26px;cursor:pointer;padding:6px;background:var(--bg);border-radius:var(--r-sm);text-align:center;border:2px solid rgba(0,0,0,.09)" @click="showEvtEmojiGrid = !showEvtEmojiGrid">{{ selEvtEmoji }}</div>
           </div>
         </div>
-        <div v-if="showEvtEmojiGrid" class="eemoji-grid" style="margin-bottom:10px">
-          <div v-for="e in EVT_EMOJIS" :key="e" class="eemoji" :class="{ on: selEvtEmoji === e }" @click="selEvtEmoji = e; showEvtEmojiGrid = false">{{ e }}</div>
+        <div v-if="showEvtEmojiGrid" style="margin-bottom:10px">
+          <EmojiPicker :emojis="EVT_EMOJIS" v-model="selEvtEmoji" @update:modelValue="showEvtEmojiGrid = false" />
         </div>
         <div class="fg" style="margin-bottom:12px">
           <label>Color</label>
@@ -565,10 +567,7 @@ const calYearRange = computed(() => {
 .life-sel-evt { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:var(--r-xs); cursor:pointer; transition:all .15s; margin-bottom:5px; border-left:3px solid transparent }
 .life-sel-evt:hover { transform:translateX(2px); filter:brightness(.97) }
 
-/* Emoji/color pickers (modal) */
-.eemoji-grid { display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; max-height:86px; overflow-y:auto }
-.eemoji { width:32px; height:32px; border-radius:7px; border:2px solid transparent; background:var(--bg); font-size:16px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center }
-.eemoji:hover, .eemoji.on { border-color:var(--sun); background:var(--sun-lt) }
+/* Color picker row (modal) */
 .ecol-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:5px }
 .ecswatch { width:26px; height:26px; border-radius:50%; border:3px solid transparent; cursor:pointer; transition:transform .18s }
 .ecswatch.on, .ecswatch:hover { transform:scale(1.25); border-color:var(--text) }

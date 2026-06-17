@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { DB, todayKcal } from '../../composables/useStore.js'
+import { DB, todayKcal, save } from '../../composables/useStore.js'
 import { streak, today } from '../../utils/date.js'
 import { MONTHS, DAYS } from '../../utils/constants.js'
 import { confetti } from '../../composables/useConfetti.js'
@@ -29,13 +29,14 @@ const calPct = computed(() => Math.min(kcal.value / goal.value, 1))
 
 function qToggle(id) {
   const task = DB.tasks.find(x => x.id === id)
-  if (task) { task.done = !task.done; if (task.done) confetti() }
+  if (task) { task.done = !task.done; if (task.done) confetti(); save() }
 }
 function qHabit(id) {
   const hb = DB.habits.find(x => x.id === id)
   if (!hb) return
   if (hb.ins.includes(t)) hb.ins = hb.ins.filter(d => d !== t)
   else { hb.ins.push(t); confetti() }
+  save()
 }
 </script>
 

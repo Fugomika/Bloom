@@ -61,7 +61,8 @@ function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]}
     </div>
 
     <!-- Modal -->
-    <div class="overlay" :class="{ open: showModal }" @click.self="closeModal">
+    <div class="overlay" :class="{ open: showModal }" @click.self="closeModal"
+      @keydown="e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveNote() }">
       <div class="modal">
         <div class="modal-head">{{ modalHead }}</div>
         <div class="fg" style="margin-bottom:10px"><label>Title</label><input type="text" v-model="nTitle" placeholder="Give it a name…"/></div>
