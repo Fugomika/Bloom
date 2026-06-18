@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { DB, save, todayMeals } from '../../composables/useStore.js'
-import { uid, today } from '../../utils/date.js'
+import { DB, addMeal as storeAddMeal, deleteMeal as storeDeleteMeal, saveSettings, todayMeals } from '../../composables/useStore.js'
+import { uid } from '../../utils/date.js'
 import { MEAL_LABELS } from '../../utils/constants.js'
 
 const showModal = ref(false)
@@ -28,20 +28,14 @@ function saveMeal() {
   const name = calName.value.trim()
   const cal = parseInt(calKcal.value) || 0
   if (!name || cal <= 0) return
-  const t = today()
-  if (!DB.meals[t]) DB.meals[t] = []
-  DB.meals[t].push({ id: uid(), name, cal, type: calType.value, at: Date.now() })
-  save(); closeModal()
+  storeAddMeal({ id: uid(), name, cal, type: calType.value, at: Date.now() })
+  closeModal()
 }
-function delMeal(id) {
-  const t = today()
-  if (DB.meals[t]) DB.meals[t] = DB.meals[t].filter(m => m.id !== id)
-  save()
-}
+function delMeal(id) { storeDeleteMeal(id) }
 function editGoal() {
   const v = prompt(`Daily calorie goal (current: ${goal.value} kcal):`, goal.value)
   const n = parseInt(v)
-  if (n && n > 0 && n < 10000) { DB.settings.calorieGoal = n; save() }
+  if (n && n > 0 && n < 10000) saveSettings({ calorieGoal: n })
 }
 
 const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']

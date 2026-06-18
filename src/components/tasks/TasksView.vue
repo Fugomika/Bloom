@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { DB, save } from '../../composables/useStore.js'
-import { uid, today, fmtDate, overdue } from '../../utils/date.js'
+import { DB, addTask as storeAddTask, updateTask, deleteTask } from '../../composables/useStore.js'
+import { uid, fmtDate, overdue } from '../../utils/date.js'
 import { confetti } from '../../composables/useConfetti.js'
 
 const tFilter = ref('all')
@@ -17,15 +17,14 @@ const filtered = computed(() => {
 
 function addTask() {
   if (!tInput.value.trim()) return
-  DB.tasks.unshift({ id: uid(), title: tInput.value.trim(), pri: tPri.value, due: tDue.value, done: false, at: Date.now() })
+  storeAddTask({ id: uid(), title: tInput.value.trim(), pri: tPri.value, due: tDue.value, done: false, at: Date.now() })
   tInput.value = ''; tDue.value = ''
-  save()
 }
 function toggleTask(id) {
   const t = DB.tasks.find(x => x.id === id)
-  if (t) { t.done = !t.done; if (t.done) confetti(); save() }
+  if (t) { const done = !t.done; if (done) confetti(); updateTask(id, { done }) }
 }
-function delTask(id) { DB.tasks = DB.tasks.filter(x => x.id !== id); save() }
+function delTask(id) { deleteTask(id) }
 function setFilter(f) { tFilter.value = f }
 </script>
 

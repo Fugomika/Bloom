@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { DB, save } from '../../composables/useStore.js'
+import { DB, upsertCalendar, deleteCalendar as storeDeleteCalendar, saveCalendarEvents } from '../../composables/useStore.js'
 import { uid, fmtYM, fmtDateShort, eventDuration } from '../../utils/date.js'
 import { MONTHS, EVT_EMOJIS, EVT_COLORS } from '../../utils/constants.js'
 import EmojiPicker from '../ui/EmojiPicker.vue'
@@ -178,21 +178,21 @@ function closeCalModal() { showCalModal.value = false; editCalId.value = null }
 function saveCalendar() {
   if (!cnName.value.trim() || !cnStart.value) return
   const totalYears = parseInt(cnYears.value) || 80
-  if (!DB.lifeCalendars) DB.lifeCalendars = []
   if (editCalId.value) {
-    const cal = DB.lifeCalendars.find(c => c.id === editCalId.value)
-    if (cal) { cal.name = cnName.value.trim(); cal.emoji = selCalEmoji.value; cal.color = selCalColor.value; cal.startDate = cnStart.value; cal.totalYears = totalYears }
+    const cal = (DB.lifeCalendars || []).find(c => c.id === editCalId.value)
+    if (cal) {
+      upsertCalendar({ ...cal, name: cnName.value.trim(), emoji: selCalEmoji.value, color: selCalColor.value, startDate: cnStart.value, totalYears })
+    }
   } else {
     const nc = { id: uid(), name: cnName.value.trim(), emoji: selCalEmoji.value, color: selCalColor.value, startDate: cnStart.value, totalYears, events: [], createdAt: Date.now() }
-    DB.lifeCalendars.push(nc); activeCalId.value = nc.id
+    upsertCalendar(nc); activeCalId.value = nc.id
   }
-  save(); closeCalModal()
+  closeCalModal()
 }
 function delCalendar(id) {
   if (!confirm('Delete this calendar and all its events?')) return
-  DB.lifeCalendars = (DB.lifeCalendars || []).filter(c => c.id !== id)
   if (activeCalId.value === id) activeCalId.value = null
-  save()
+  storeDeleteCalendar(id)
 }
 
 // ── Event modal ─────────────────────────────────────────────
@@ -223,18 +223,20 @@ function saveEvent() {
   if (!evtTitle.value.trim()) return
   const start = `${evtSY.value}-${String(evtSM.value).padStart(2, '0')}`
   const end = evtOngoing.value ? null : `${evtEY.value}-${String(evtEM.value).padStart(2, '0')}`
-  if (!cal.events) cal.events = []
+  let newEvents
   if (editEvtId.value) {
-    const ev = cal.events.find(e => e.id === editEvtId.value)
-    if (ev) { ev.title = evtTitle.value.trim(); ev.emoji = selEvtEmoji.value; ev.color = selEvtColor.value; ev.start = start; ev.end = end }
+    newEvents = (cal.events || []).map(e => e.id === editEvtId.value
+      ? { ...e, title: evtTitle.value.trim(), emoji: selEvtEmoji.value, color: selEvtColor.value, start, end }
+      : e)
   } else {
-    cal.events.push({ id: uid(), title: evtTitle.value.trim(), emoji: selEvtEmoji.value, color: selEvtColor.value, start, end, at: Date.now() })
+    newEvents = [...(cal.events || []), { id: uid(), title: evtTitle.value.trim(), emoji: selEvtEmoji.value, color: selEvtColor.value, start, end, at: Date.now() }]
   }
-  save(); closeEvtModal()
+  saveCalendarEvents(activeCalId.value, newEvents)
+  closeEvtModal()
 }
 function delEvent(id) {
   const cal = getCal(); if (!cal) return
-  cal.events = (cal.events || []).filter(e => e.id !== id); save()
+  saveCalendarEvents(activeCalId.value, (cal.events || []).filter(e => e.id !== id))
 }
 function delEvtFromModal() { if (editEvtId.value) delEvent(editEvtId.value); closeEvtModal() }
 

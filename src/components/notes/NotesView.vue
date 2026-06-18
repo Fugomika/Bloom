@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { DB, save } from '../../composables/useStore.js'
+import { DB, upsertNote, deleteNote } from '../../composables/useStore.js'
 import { uid } from '../../utils/date.js'
 import { NOTE_COLORS, MONTHS } from '../../utils/constants.js'
 
@@ -31,13 +31,13 @@ function saveNote() {
   if (!body && title === 'Untitled') { closeModal(); return }
   if (editId.value) {
     const n = DB.notes.find(x => x.id === editId.value)
-    if (n) { n.title = title; n.body = body; n.color = selColor.value; n.at = Date.now() }
+    if (n) upsertNote({ ...n, title, body, color: selColor.value, at: Date.now() })
   } else {
-    DB.notes.unshift({ id: uid(), title, body, color: selColor.value, at: Date.now() })
+    upsertNote({ id: uid(), title, body, color: selColor.value, at: Date.now() })
   }
-  save(); closeModal()
+  closeModal()
 }
-function delNote(id, e) { e.stopPropagation(); DB.notes = DB.notes.filter(x => x.id !== id); save() }
+function delNote(id, e) { e.stopPropagation(); deleteNote(id) }
 function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]} ${d.getDate()}` }
 </script>
 

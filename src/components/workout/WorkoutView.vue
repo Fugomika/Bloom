@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { DB, save } from '../../composables/useStore.js'
+import { DB, addWorkout as storeAddWorkout, deleteWorkout } from '../../composables/useStore.js'
 import { uid, today } from '../../utils/date.js'
 import { MONTHS } from '../../utils/constants.js'
 import { confetti } from '../../composables/useConfetti.js'
@@ -25,10 +25,10 @@ function saveWorkout() {
     .filter(r => r.name.trim())
     .map(r => ({ id: uid(), name: r.name.trim(), sets: parseInt(r.sets)||0, reps: parseInt(r.reps)||0, weight: parseFloat(r.weight)||0 }))
   if (!exercises.length) return
-  DB.workouts.unshift({ id: uid(), date: t, name: wktName.value.trim(), exercises, at: Date.now() })
-  save(); closeModal(); confetti()
+  storeAddWorkout({ id: uid(), date: t, name: wktName.value.trim(), exercises, at: Date.now() })
+  closeModal(); confetti()
 }
-function delWorkout(id) { DB.workouts = DB.workouts.filter(w => w.id !== id); save() }
+function delWorkout(id) { deleteWorkout(id) }
 function exDetail(ex) {
   if (ex.sets && ex.reps && ex.weight) return `${ex.sets}×${ex.reps} @ ${ex.weight}kg`
   if (ex.sets && ex.reps) return `${ex.sets}×${ex.reps}`

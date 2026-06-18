@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { DB, save } from '../../composables/useStore.js'
+import { DB, addHabit as storeAddHabit, updateHabitIns, deleteHabit } from '../../composables/useStore.js'
 import { uid, today, streak, last7 } from '../../utils/date.js'
 import { confetti } from '../../composables/useConfetti.js'
 import { EMOJIS, DLBL } from '../../utils/constants.js'
@@ -12,17 +12,17 @@ const selEmoji = ref(EMOJIS[0])
 
 function addHabit() {
   if (!hInput.value.trim()) return
-  DB.habits.push({ id: uid(), name: hInput.value.trim(), emoji: selEmoji.value, color: hColor.value, ins: [], at: Date.now() })
-  hInput.value = ''; save()
+  storeAddHabit({ id: uid(), name: hInput.value.trim(), emoji: selEmoji.value, color: hColor.value, ins: [], at: Date.now() })
+  hInput.value = ''
 }
 function checkin(id) {
   const h = DB.habits.find(x => x.id === id), t = today()
   if (!h) return
-  if (h.ins.includes(t)) h.ins = h.ins.filter(d => d !== t)
-  else { h.ins.push(t); confetti() }
-  save()
+  const newIns = h.ins.includes(t) ? h.ins.filter(d => d !== t) : [...h.ins, t]
+  if (!h.ins.includes(t)) confetti()
+  updateHabitIns(id, newIns)
 }
-function delHabit(id) { DB.habits = DB.habits.filter(x => x.id !== id); save() }
+function delHabit(id) { deleteHabit(id) }
 
 const t = today()
 const w = last7()
