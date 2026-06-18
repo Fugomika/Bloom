@@ -1,11 +1,7 @@
 import { reactive, ref } from 'vue'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase.js'
+import { user } from './useAuth.js'
 import { today } from '../utils/date.js'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
 
 export const DB = reactive({
   tasks: [],
@@ -19,17 +15,22 @@ export const DB = reactive({
 
 export const loading = ref(true)
 
+function uid() { return user.value?.id }
+
 // ── Load ───────────────────────────────────────────────────────
 export async function load() {
+  const userId = uid()
+  if (!userId) return
   loading.value = true
+
   const [tasks, habits, notes, meals, workouts, calendars, settingsRes] = await Promise.all([
-    supabase.from('tasks').select('*').order('at', { ascending: false }),
-    supabase.from('habits').select('*').order('at', { ascending: false }),
-    supabase.from('notes').select('*').order('at', { ascending: false }),
-    supabase.from('meals').select('*'),
-    supabase.from('workouts').select('*').order('at', { ascending: false }),
-    supabase.from('life_calendars').select('*').order('created_at', { ascending: true }),
-    supabase.from('settings').select('*').eq('id', 1).maybeSingle(),
+    supabase.from('tasks').select('*').eq('user_id', userId).order('at', { ascending: false }),
+    supabase.from('habits').select('*').eq('user_id', userId).order('at', { ascending: false }),
+    supabase.from('notes').select('*').eq('user_id', userId).order('at', { ascending: false }),
+    supabase.from('meals').select('*').eq('user_id', userId),
+    supabase.from('workouts').select('*').eq('user_id', userId).order('at', { ascending: false }),
+    supabase.from('life_calendars').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+    supabase.from('settings').select('*').eq('user_id', userId).maybeSingle(),
   ])
 
   DB.tasks = tasks.data || []
@@ -58,44 +59,55 @@ export async function load() {
   if (settingsRes.data) {
     DB.settings.calorieGoal = settingsRes.data.calorie_goal
   } else {
-    await supabase.from('settings').insert({ id: 1, calorie_goal: 2000 })
+    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000 })
   }
 
   loading.value = false
 }
 
+export function reset() {
+  DB.tasks = []
+  DB.habits = []
+  DB.notes = []
+  DB.meals = {}
+  DB.workouts = []
+  DB.lifeCalendars = []
+  DB.settings = { calorieGoal: 2000 }
+  loading.value = true
+}
+
 // ── Tasks ──────────────────────────────────────────────────────
 export function addTask(task) {
   DB.tasks.unshift(task)
-  supabase.from('tasks').insert(task)
+  supabase.from('tasks').insert({ ...task, user_id: uid() })
 }
 
 export function updateTask(id, updates) {
   const t = DB.tasks.find(x => x.id === id)
   if (t) Object.assign(t, updates)
-  supabase.from('tasks').update(updates).eq('id', id)
+  supabase.from('tasks').update(updates).eq('id', id).eq('user_id', uid())
 }
 
 export function deleteTask(id) {
   DB.tasks = DB.tasks.filter(x => x.id !== id)
-  supabase.from('tasks').delete().eq('id', id)
+  supabase.from('tasks').delete().eq('id', id).eq('user_id', uid())
 }
 
 // ── Habits ─────────────────────────────────────────────────────
 export function addHabit(habit) {
   DB.habits.push(habit)
-  supabase.from('habits').insert({ ...habit, ins: habit.ins || [] })
+  supabase.from('habits').insert({ ...habit, ins: habit.ins || [], user_id: uid() })
 }
 
 export function updateHabitIns(id, ins) {
   const h = DB.habits.find(x => x.id === id)
   if (h) h.ins = ins
-  supabase.from('habits').update({ ins }).eq('id', id)
+  supabase.from('habits').update({ ins }).eq('id', id).eq('user_id', uid())
 }
 
 export function deleteHabit(id) {
   DB.habits = DB.habits.filter(x => x.id !== id)
-  supabase.from('habits').delete().eq('id', id)
+  supabase.from('habits').delete().eq('id', id).eq('user_id', uid())
 }
 
 // ── Notes ──────────────────────────────────────────────────────
@@ -103,12 +115,12 @@ export function upsertNote(note) {
   const idx = DB.notes.findIndex(x => x.id === note.id)
   if (idx >= 0) DB.notes[idx] = note
   else DB.notes.unshift(note)
-  supabase.from('notes').upsert(note)
+  supabase.from('notes').upsert({ ...note, user_id: uid() })
 }
 
 export function deleteNote(id) {
   DB.notes = DB.notes.filter(x => x.id !== id)
-  supabase.from('notes').delete().eq('id', id)
+  supabase.from('notes').delete().eq('id', id).eq('user_id', uid())
 }
 
 // ── Meals ──────────────────────────────────────────────────────
@@ -116,29 +128,29 @@ export function addMeal(meal) {
   const t = today()
   if (!DB.meals[t]) DB.meals[t] = []
   DB.meals[t].push(meal)
-  supabase.from('meals').insert({ ...meal, date: t })
+  supabase.from('meals').insert({ ...meal, date: t, user_id: uid() })
 }
 
 export function deleteMeal(id) {
   const t = today()
   if (DB.meals[t]) DB.meals[t] = DB.meals[t].filter(m => m.id !== id)
-  supabase.from('meals').delete().eq('id', id)
+  supabase.from('meals').delete().eq('id', id).eq('user_id', uid())
 }
 
 export function saveSettings(settings) {
   Object.assign(DB.settings, settings)
-  supabase.from('settings').update({ calorie_goal: settings.calorieGoal }).eq('id', 1)
+  supabase.from('settings').update({ calorie_goal: settings.calorieGoal }).eq('user_id', uid())
 }
 
 // ── Workouts ───────────────────────────────────────────────────
 export function addWorkout(workout) {
   DB.workouts.unshift(workout)
-  supabase.from('workouts').insert({ ...workout, exercises: workout.exercises })
+  supabase.from('workouts').insert({ ...workout, exercises: workout.exercises, user_id: uid() })
 }
 
 export function deleteWorkout(id) {
   DB.workouts = DB.workouts.filter(x => x.id !== id)
-  supabase.from('workouts').delete().eq('id', id)
+  supabase.from('workouts').delete().eq('id', id).eq('user_id', uid())
 }
 
 // ── Life Calendars ─────────────────────────────────────────────
@@ -152,6 +164,7 @@ function calToRow(cal) {
     total_years: cal.totalYears,
     events: cal.events || [],
     created_at: cal.createdAt,
+    user_id: uid(),
   }
 }
 
@@ -164,13 +177,13 @@ export function upsertCalendar(cal) {
 
 export function deleteCalendar(id) {
   DB.lifeCalendars = DB.lifeCalendars.filter(c => c.id !== id)
-  supabase.from('life_calendars').delete().eq('id', id)
+  supabase.from('life_calendars').delete().eq('id', id).eq('user_id', uid())
 }
 
 export function saveCalendarEvents(calId, events) {
   const cal = DB.lifeCalendars.find(c => c.id === calId)
   if (cal) cal.events = events
-  supabase.from('life_calendars').update({ events }).eq('id', calId)
+  supabase.from('life_calendars').update({ events }).eq('id', calId).eq('user_id', uid())
 }
 
 // ── Helpers ────────────────────────────────────────────────────

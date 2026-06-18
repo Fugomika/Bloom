@@ -1,31 +1,39 @@
 # Supabase Setup Guide
 
-This is a beginner-friendly guide to spin up Supabase for Bloom.
+Beginner-friendly guide to spin up Supabase for Bloom with full auth and per-user data.
 
 ---
 
 ## Step 1 — Create a Supabase Project
 
-1. Go to [supabase.com](https://supabase.com) and sign up (it's free)
+1. Go to [supabase.com](https://supabase.com) and sign up (free)
 2. Click **New project**
 3. Fill in:
-   - **Name**: `bloom` (or anything you like)
-   - **Database password**: pick a strong password and save it somewhere
-   - **Region**: choose the one closest to you
-4. Click **Create new project** and wait ~1 minute for it to provision
+   - **Name**: `bloom`
+   - **Database password**: pick something strong, save it
+   - **Region**: closest to you
+4. Click **Create new project** — wait ~1 minute
 
 ---
 
-## Step 2 — Run the SQL Schema
+## Step 2 — Enable Email Auth
 
-1. In your Supabase project, click **SQL Editor** in the left sidebar
-2. Click **New query**
-3. Paste the entire block below and click **Run**
+1. In the left sidebar go to **Authentication → Providers**
+2. Find **Email** — it should already be enabled by default
+3. Leave the settings as-is (magic links off, email confirmations on is fine)
+
+---
+
+## Step 3 — Run the SQL Schema
+
+1. Click **SQL Editor** in the left sidebar → **New query**
+2. Paste the entire block below and click **Run**
 
 ```sql
 -- Tasks
 CREATE TABLE tasks (
   id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   pri TEXT DEFAULT 'medium',
   due TEXT DEFAULT '',
@@ -36,6 +44,7 @@ CREATE TABLE tasks (
 -- Habits
 CREATE TABLE habits (
   id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   emoji TEXT DEFAULT '',
   color TEXT DEFAULT 'pink',
@@ -46,6 +55,7 @@ CREATE TABLE habits (
 -- Notes
 CREATE TABLE notes (
   id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT DEFAULT '',
   body TEXT DEFAULT '',
   color TEXT DEFAULT '#FEF9C3',
@@ -55,6 +65,7 @@ CREATE TABLE notes (
 -- Meals
 CREATE TABLE meals (
   id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   date TEXT NOT NULL,
   name TEXT NOT NULL,
   cal INTEGER DEFAULT 0,
@@ -65,6 +76,7 @@ CREATE TABLE meals (
 -- Workouts
 CREATE TABLE workouts (
   id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   date TEXT NOT NULL,
   name TEXT NOT NULL,
   exercises JSONB DEFAULT '[]',
@@ -74,6 +86,7 @@ CREATE TABLE workouts (
 -- Life Calendars
 CREATE TABLE life_calendars (
   id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   emoji TEXT DEFAULT '🌻',
   color TEXT DEFAULT '#34D399',
@@ -83,75 +96,79 @@ CREATE TABLE life_calendars (
   created_at BIGINT NOT NULL
 );
 
--- Settings (single row)
+-- Settings (one row per user)
 CREATE TABLE settings (
-  id INTEGER PRIMARY KEY DEFAULT 1,
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   calorie_goal INTEGER DEFAULT 2000
 );
-
-INSERT INTO settings (id, calorie_goal) VALUES (1, 2000);
 ```
 
-You should see "Success. No rows returned." — that means it worked.
+You should see "Success. No rows returned."
 
 ---
 
-## Step 3 — Disable Row Level Security (for single-user use)
+## Step 4 — Enable Row Level Security
 
-Since Bloom is a personal app with no logins, the easiest approach is to open up the tables.
+Run this in a second SQL query to lock each table down to its owner:
 
-1. In the left sidebar, go to **Authentication → Policies**
-2. For each table (`tasks`, `habits`, `notes`, `meals`, `workouts`, `life_calendars`, `settings`):
-   - Click the table name
-   - Toggle **Row Level Security** to **OFF**
+```sql
+-- Enable RLS on all tables
+ALTER TABLE tasks          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE habits         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notes          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE meals          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workouts       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE life_calendars ENABLE ROW LEVEL SECURITY;
+ALTER TABLE settings       ENABLE ROW LEVEL SECURITY;
 
-> Alternatively, run this in the SQL Editor:
-> ```sql
-> ALTER TABLE tasks DISABLE ROW LEVEL SECURITY;
-> ALTER TABLE habits DISABLE ROW LEVEL SECURITY;
-> ALTER TABLE notes DISABLE ROW LEVEL SECURITY;
-> ALTER TABLE meals DISABLE ROW LEVEL SECURITY;
-> ALTER TABLE workouts DISABLE ROW LEVEL SECURITY;
-> ALTER TABLE life_calendars DISABLE ROW LEVEL SECURITY;
-> ALTER TABLE settings DISABLE ROW LEVEL SECURITY;
-> ```
+-- Each user can only see and modify their own rows
+CREATE POLICY "own tasks"     ON tasks          FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own habits"    ON habits         FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own notes"     ON notes          FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own meals"     ON meals          FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own workouts"  ON workouts       FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own calendars" ON life_calendars FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own settings"  ON settings       FOR ALL USING (auth.uid() = user_id);
+```
 
----
-
-## Step 4 — Get Your API Keys
-
-1. In the left sidebar, click **Project Settings** (gear icon) → **API**
-2. Copy two values:
-   - **Project URL** — looks like `https://abcdefgh.supabase.co`
-   - **anon / public key** — a long `eyJ...` string
+This is what makes the app secure — the anon key can only reach rows that belong to the signed-in user.
 
 ---
 
-## Step 5 — Add Keys to the App
+## Step 5 — Get Your API Keys
 
-1. In the `bloom-vue/` folder, create a file called `.env`:
+1. Go to **Project Settings** (gear icon) → **API**
+2. Copy:
+   - **Project URL** — `https://abcdefgh.supabase.co`
+   - **anon / public key** — the long `eyJ...` string
+
+---
+
+## Step 6 — Add Keys to the App
+
+Create a `.env` file inside `bloom-vue/`:
 
 ```
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJyour-anon-key-here
 ```
 
-Replace the values with what you copied in Step 4.
-
-> `.env` is in `.gitignore` — it will never be committed to git.
+> `.env` is gitignored — it will never be committed.
 
 ---
 
-## Step 6 — Run the App
+## Step 7 — Run the App
 
 ```bash
 cd bloom-vue
 npm run dev
 ```
 
-Open the URL shown in your terminal (usually `http://localhost:5173`).
+Open `http://localhost:5173`. The login screen will appear.
 
-The app will show a **"Loading Bloom…"** screen briefly while it connects to Supabase, then load normally. All data you add is now stored in Supabase and synced across any device.
+**First time:** click "Create one →", sign up with your email, confirm the email Supabase sends you, then sign in.
+
+After that, every sign-in loads your personal data. Data is private to your account.
 
 ---
 
@@ -159,7 +176,8 @@ The app will show a **"Loading Bloom…"** screen briefly while it connects to S
 
 | Problem | Fix |
 |---|---|
-| App shows loading forever | Check that `.env` has the correct URL and key, then restart `npm run dev` |
-| "Failed to fetch" error in console | Make sure RLS is disabled (Step 3) |
-| Data doesn't appear | Open Supabase → **Table Editor** to verify rows are being inserted |
-| `relation "tasks" does not exist` | Re-run the SQL from Step 2 |
+| Login screen shows but sign-in fails | Double-check your `.env` URL and key match Supabase exactly |
+| "new row violates row-level security" | Make sure you ran Step 4 (RLS policies) |
+| App shows loading forever after sign-in | Open browser DevTools → Console for the specific error |
+| Email confirmation not arriving | Check spam; or in Supabase go to Auth → Users and manually confirm |
+| `relation "tasks" does not exist` | Re-run the SQL from Step 3 |

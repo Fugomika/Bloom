@@ -1,9 +1,8 @@
 <script setup>
-import { computed } from 'vue'
-import { MONTHS, DAYS } from '../../utils/constants.js'
+import { MONTHS } from '../../utils/constants.js'
 
 defineProps({ active: String })
-const emit = defineEmits(['navigate'])
+const emit = defineEmits(['navigate', 'signout'])
 
 const now = new Date()
 const dayNum = now.getDate()
@@ -37,6 +36,10 @@ const NAV = [
         <div class="big">{{ dayNum }}</div>
         <div class="lbl" style="opacity:.6;font-size:11px;margin-top:1px">{{ monthYear }}</div>
       </div>
+      <button class="signout-btn" @click="emit('signout')" title="Sign out">
+        <span class="nav-icon" style="background:rgba(255,255,255,.08)">🚪</span>
+        <span>Sign out</span>
+      </button>
     </div>
   </aside>
 </template>
@@ -57,7 +60,9 @@ const NAV = [
 .nav-btn[data-s="workout"]   .nav-icon { background:linear-gradient(135deg,#EF4444,#DC2626) }
 .nav-btn[data-s="notes"]     .nav-icon { background:linear-gradient(135deg,#8B5CF6,#7C3AED) }
 .nav-btn[data-s="life"]      .nav-icon { background:linear-gradient(135deg,#34D399,#818CF8) }
-.sidebar-foot { margin-top:auto; padding:10px }
+.sidebar-foot { margin-top:auto; padding:10px; display:flex; flex-direction:column; gap:8px }
+.signout-btn { width:100%; display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); border:none; background:none; cursor:pointer; color:rgba(255,255,255,.38); font-family:'Nunito',sans-serif; font-size:13.5px; font-weight:700; text-align:left; transition:all .18s }
+.signout-btn:hover { background:rgba(239,68,68,.18); color:rgba(255,100,100,.9) }
 .date-chip { background:rgba(255,255,255,.06); border-radius:var(--r-sm); padding:12px; color:rgba(255,255,255,.6); font-size:12px; font-weight:700 }
 .date-chip .big { font-family:'Fredoka One',cursive; font-size:28px; color:#fff; line-height:1 }
 

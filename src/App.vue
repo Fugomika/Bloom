@@ -1,19 +1,23 @@
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue'
-import { load, loading } from './composables/useStore.js'
+import { watch, onMounted, onBeforeUnmount } from 'vue'
+import { user, initAuth, signOut } from './composables/useAuth.js'
+import { load, loading, reset } from './composables/useStore.js'
 import { activeSection, go } from './composables/useNavigation.js'
-import AppSidebar from './components/layout/AppSidebar.vue'
+import LoginView    from './components/auth/LoginView.vue'
+import AppSidebar   from './components/layout/AppSidebar.vue'
 import AppBottomNav from './components/layout/AppBottomNav.vue'
 import DashboardView from './components/dashboard/DashboardView.vue'
-import TasksView from './components/tasks/TasksView.vue'
-import HabitsView from './components/habits/HabitsView.vue'
+import TasksView    from './components/tasks/TasksView.vue'
+import HabitsView   from './components/habits/HabitsView.vue'
 import CaloriesView from './components/calories/CaloriesView.vue'
-import WorkoutView from './components/workout/WorkoutView.vue'
-import NotesView from './components/notes/NotesView.vue'
-import LifeView from './components/life/LifeView.vue'
+import WorkoutView  from './components/workout/WorkoutView.vue'
+import NotesView    from './components/notes/NotesView.vue'
+import LifeView     from './components/life/LifeView.vue'
 
 onMounted(async () => {
-  await load()
+  await initAuth()
+  if (user.value) await load()
+
   function handleKey(e) {
     if (e.key === 'Escape') {
       document.querySelectorAll('.overlay.open').forEach(el => el.classList.remove('open'))
@@ -22,17 +26,35 @@ onMounted(async () => {
   document.addEventListener('keydown', handleKey)
   onBeforeUnmount(() => document.removeEventListener('keydown', handleKey))
 })
+
+watch(user, async (newUser) => {
+  if (newUser) {
+    await load()
+  } else {
+    reset()
+  }
+})
+
+async function handleSignOut() {
+  await signOut()
+}
 </script>
 
 <template>
-  <div v-if="loading" class="app-loading">
+  <!-- Not signed in -->
+  <LoginView v-if="!user" />
+
+  <!-- Signed in, loading data -->
+  <div v-else-if="loading" class="app-loading">
     <div class="app-loading-inner">
       <div class="app-loading-logo">🌻</div>
       <div class="app-loading-text">Loading Bloom…</div>
     </div>
   </div>
+
+  <!-- App -->
   <template v-else>
-    <AppSidebar :active="activeSection" @navigate="go" />
+    <AppSidebar :active="activeSection" @navigate="go" @signout="handleSignOut" />
     <main class="main">
       <DashboardView :class="['section', activeSection === 'dashboard' ? 'active' : '']" />
       <TasksView     :class="['section', activeSection === 'tasks'     ? 'active' : '']" />
