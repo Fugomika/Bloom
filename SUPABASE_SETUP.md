@@ -99,7 +99,8 @@ CREATE TABLE life_calendars (
 -- Settings (one row per user)
 CREATE TABLE settings (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  calorie_goal INTEGER DEFAULT 2000
+  calorie_goal INTEGER DEFAULT 2000,
+  visible_sections TEXT[] DEFAULT ARRAY['tasks','habits','calories','workout','notes','life']
 );
 ```
 
@@ -169,6 +170,18 @@ Open `http://localhost:5173`. The login screen will appear.
 **First time:** click "Create one →", sign up with your email, confirm the email Supabase sends you, then sign in.
 
 After that, every sign-in loads your personal data. Data is private to your account.
+
+---
+
+## Migrations
+
+If you already set up Supabase before the section toggler was added, run this to add the missing column:
+
+```sql
+ALTER TABLE settings
+  ADD COLUMN IF NOT EXISTS visible_sections TEXT[]
+  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life'];
+```
 
 ---
 

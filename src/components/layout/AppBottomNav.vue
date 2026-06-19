@@ -1,8 +1,11 @@
 <script setup>
+import { computed } from 'vue'
+import { DB } from '../../composables/useStore.js'
+
 defineProps({ active: String })
 const emit = defineEmits(['navigate'])
 
-const NAV = [
+const ALL_NAV = [
   { s: 'dashboard', icon: '🏠', label: 'Home' },
   { s: 'tasks',     icon: '✅', label: 'Tasks' },
   { s: 'habits',    icon: '🔥', label: 'Habits' },
@@ -11,6 +14,10 @@ const NAV = [
   { s: 'notes',     icon: '📝', label: 'Notes' },
   { s: 'life',      icon: '📅', label: 'Life' },
 ]
+
+const NAV = computed(() =>
+  ALL_NAV.filter(n => n.s === 'dashboard' || DB.settings.visibleSections.includes(n.s))
+)
 </script>
 
 <template>

@@ -3,6 +3,8 @@ import { supabase } from '../lib/supabase.js'
 import { user } from './useAuth.js'
 import { today } from '../utils/date.js'
 
+export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life']
+
 export const DB = reactive({
   tasks: [],
   habits: [],
@@ -10,7 +12,7 @@ export const DB = reactive({
   meals: {},
   workouts: [],
   lifeCalendars: [],
-  settings: { calorieGoal: 2000 },
+  settings: { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] },
 })
 
 export const loading = ref(true)
@@ -58,8 +60,9 @@ export async function load() {
 
   if (settingsRes.data) {
     DB.settings.calorieGoal = settingsRes.data.calorie_goal
+    DB.settings.visibleSections = settingsRes.data.visible_sections || [...ALL_SECTIONS]
   } else {
-    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000 })
+    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, visible_sections: ALL_SECTIONS })
   }
 
   loading.value = false
@@ -72,7 +75,7 @@ export function reset() {
   DB.meals = {}
   DB.workouts = []
   DB.lifeCalendars = []
-  DB.settings = { calorieGoal: 2000 }
+  DB.settings = { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] }
   loading.value = true
 }
 
@@ -139,7 +142,10 @@ export function deleteMeal(id) {
 
 export function saveSettings(settings) {
   Object.assign(DB.settings, settings)
-  supabase.from('settings').update({ calorie_goal: settings.calorieGoal }).eq('user_id', uid())
+  supabase.from('settings').update({
+    calorie_goal: DB.settings.calorieGoal,
+    visible_sections: DB.settings.visibleSections,
+  }).eq('user_id', uid())
 }
 
 // ── Workouts ───────────────────────────────────────────────────
