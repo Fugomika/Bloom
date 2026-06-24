@@ -207,7 +207,7 @@ ALTER TABLE settings
   DEFAULT ARRAY['tasks','habits','calories','workout','notes','life'];
 ```
 
-If you already set up Supabase before Watchlist + Food Picks were added, run this:
+If you already set up Supabase before Watchlist + Food Picks were added, run this (includes a one-time fix to add new sections to existing users):
 
 ```sql
 -- New tables
@@ -236,6 +236,15 @@ ALTER TABLE watchlist   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE food_spots  ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "own watchlist"  ON watchlist   FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own food_spots" ON food_spots  FOR ALL USING (auth.uid() = user_id);
+
+-- Add new sections to any existing users who don't have them yet
+UPDATE settings
+SET visible_sections = array_append(visible_sections, 'watchlist')
+WHERE NOT ('watchlist' = ANY(visible_sections));
+
+UPDATE settings
+SET visible_sections = array_append(visible_sections, 'food')
+WHERE NOT ('food' = ANY(visible_sections));
 ```
 
 ---

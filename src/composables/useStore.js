@@ -74,13 +74,7 @@ export async function load() {
 
   if (settingsRes.data) {
     DB.settings.calorieGoal = settingsRes.data.calorie_goal
-    const saved = settingsRes.data.visible_sections || []
-    const newSections = ALL_SECTIONS.filter(s => !saved.includes(s))
-    const merged = newSections.length > 0 ? [...saved, ...newSections] : saved
-    DB.settings.visibleSections = merged
-    if (newSections.length > 0) {
-      supabase.from('settings').update({ visible_sections: merged }).eq('user_id', userId)
-    }
+    DB.settings.visibleSections = settingsRes.data.visible_sections || [...ALL_SECTIONS]
   } else {
     DB.settings.visibleSections = [...ALL_SECTIONS]
     await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, visible_sections: ALL_SECTIONS })
