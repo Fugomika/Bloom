@@ -100,7 +100,29 @@ CREATE TABLE life_calendars (
 CREATE TABLE settings (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   calorie_goal INTEGER DEFAULT 2000,
-  visible_sections TEXT[] DEFAULT ARRAY['tasks','habits','calories','workout','notes','life']
+  visible_sections TEXT[] DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','food']
+);
+
+-- Watchlist
+CREATE TABLE watchlist (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  type TEXT DEFAULT 'movie',
+  status TEXT DEFAULT 'queued',
+  pri INTEGER DEFAULT 0,
+  at BIGINT NOT NULL
+);
+
+-- Food Spots (favorites)
+CREATE TABLE food_spots (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  notes TEXT DEFAULT '',
+  carb_type TEXT DEFAULT 'nasi',
+  texture TEXT DEFAULT 'tidak',
+  at BIGINT NOT NULL
 );
 ```
 
@@ -128,8 +150,10 @@ CREATE POLICY "own habits"    ON habits         FOR ALL USING (auth.uid() = user
 CREATE POLICY "own notes"     ON notes          FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own meals"     ON meals          FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own workouts"  ON workouts       FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "own calendars" ON life_calendars FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "own settings"  ON settings       FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own calendars"   ON life_calendars FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own settings"    ON settings       FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own watchlist"   ON watchlist      FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own food_spots"  ON food_spots     FOR ALL USING (auth.uid() = user_id);
 ```
 
 This is what makes the app secure — the anon key can only reach rows that belong to the signed-in user.
@@ -181,6 +205,37 @@ If you already set up Supabase before the section toggler was added, run this to
 ALTER TABLE settings
   ADD COLUMN IF NOT EXISTS visible_sections TEXT[]
   DEFAULT ARRAY['tasks','habits','calories','workout','notes','life'];
+```
+
+If you already set up Supabase before Watchlist + Food Picks were added, run this:
+
+```sql
+-- New tables
+CREATE TABLE IF NOT EXISTS watchlist (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  type TEXT DEFAULT 'movie',
+  status TEXT DEFAULT 'queued',
+  pri INTEGER DEFAULT 0,
+  at BIGINT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS food_spots (
+  id TEXT PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  notes TEXT DEFAULT '',
+  carb_type TEXT DEFAULT 'nasi',
+  texture TEXT DEFAULT 'tidak',
+  at BIGINT NOT NULL
+);
+
+-- RLS for new tables
+ALTER TABLE watchlist   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE food_spots  ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "own watchlist"  ON watchlist   FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own food_spots" ON food_spots  FOR ALL USING (auth.uid() = user_id);
 ```
 
 ---

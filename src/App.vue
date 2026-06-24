@@ -11,8 +11,10 @@ import TasksView    from './components/tasks/TasksView.vue'
 import HabitsView   from './components/habits/HabitsView.vue'
 import CaloriesView from './components/calories/CaloriesView.vue'
 import WorkoutView  from './components/workout/WorkoutView.vue'
-import NotesView    from './components/notes/NotesView.vue'
-import LifeView     from './components/life/LifeView.vue'
+import NotesView      from './components/notes/NotesView.vue'
+import LifeView       from './components/life/LifeView.vue'
+import WatchlistView  from './components/watchlist/WatchlistView.vue'
+import FoodView       from './components/food/FoodView.vue'
 
 onMounted(async () => {
   await initAuth()
@@ -62,7 +64,9 @@ async function handleSignOut() {
       <CaloriesView  :class="['section', activeSection === 'calories'  ? 'active' : '']" />
       <WorkoutView   :class="['section', activeSection === 'workout'   ? 'active' : '']" />
       <NotesView     :class="['section', activeSection === 'notes'     ? 'active' : '']" />
-      <LifeView      :class="['section', activeSection === 'life'      ? 'active' : '']" />
+      <LifeView         :class="['section', activeSection === 'life'      ? 'active' : '']" />
+      <WatchlistView    :class="['section', activeSection === 'watchlist' ? 'active' : '']" />
+      <FoodView         :class="['section', activeSection === 'food'      ? 'active' : '']" />
     </main>
     <AppBottomNav :active="activeSection" @navigate="go" />
   </template>

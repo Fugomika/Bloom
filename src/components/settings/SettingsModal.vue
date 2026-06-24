@@ -7,12 +7,14 @@ defineProps({ open: Boolean })
 const emit = defineEmits(['close'])
 
 const SECTION_META = {
-  tasks:    { icon: '✅', label: 'Tasks',    grad: 'linear-gradient(135deg,#10B981,#059669)' },
-  habits:   { icon: '🔥', label: 'Habits',   grad: 'linear-gradient(135deg,#F97316,#EA580C)' },
-  calories: { icon: '🥗', label: 'Calories', grad: 'linear-gradient(135deg,#84CC16,#22C55E)' },
-  workout:  { icon: '💪', label: 'Workout',  grad: 'linear-gradient(135deg,#EF4444,#DC2626)' },
-  notes:    { icon: '📝', label: 'Notes',    grad: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
-  life:     { icon: '📅', label: 'Life',     grad: 'linear-gradient(135deg,#34D399,#818CF8)' },
+  tasks:     { icon: '✅', label: 'Tasks',     grad: 'linear-gradient(135deg,#10B981,#059669)' },
+  habits:    { icon: '🔥', label: 'Habits',    grad: 'linear-gradient(135deg,#F97316,#EA580C)' },
+  calories:  { icon: '🥗', label: 'Calories',  grad: 'linear-gradient(135deg,#84CC16,#22C55E)' },
+  workout:   { icon: '💪', label: 'Workout',   grad: 'linear-gradient(135deg,#EF4444,#DC2626)' },
+  notes:     { icon: '📝', label: 'Notes',     grad: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
+  life:      { icon: '📅', label: 'Life',      grad: 'linear-gradient(135deg,#34D399,#818CF8)' },
+  watchlist: { icon: '🎬', label: 'Watchlist', grad: 'linear-gradient(135deg,#EC4899,#DB2777)' },
+  food:      { icon: '🍜', label: 'Food Picks',grad: 'linear-gradient(135deg,#FBBF24,#F97316)' },
 }
 
 const sections = computed(() => ALL_SECTIONS.map(s => ({

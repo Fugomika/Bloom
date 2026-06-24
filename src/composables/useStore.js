@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { user } from './useAuth.js'
 import { today } from '../utils/date.js'
 
-export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life']
+export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'food']
 
 export const DB = reactive({
   tasks: [],
@@ -12,6 +12,8 @@ export const DB = reactive({
   meals: {},
   workouts: [],
   lifeCalendars: [],
+  watchlist: [],
+  foodSpots: [],
   settings: { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] },
 })
 
@@ -25,13 +27,15 @@ export async function load() {
   if (!userId) return
   loading.value = true
 
-  const [tasks, habits, notes, meals, workouts, calendars, settingsRes] = await Promise.all([
+  const [tasks, habits, notes, meals, workouts, calendars, watchlist, foodSpots, settingsRes] = await Promise.all([
     supabase.from('tasks').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('habits').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('notes').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('meals').select('*').eq('user_id', userId),
     supabase.from('workouts').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('life_calendars').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+    supabase.from('watchlist').select('*').eq('user_id', userId).order('pri', { ascending: true }),
+    supabase.from('food_spots').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('settings').select('*').eq('user_id', userId).maybeSingle(),
   ])
 
@@ -58,10 +62,27 @@ export async function load() {
     createdAt: c.created_at,
   }))
 
+  DB.watchlist = watchlist.data || []
+  DB.foodSpots = (foodSpots.data || []).map(f => ({
+    id: f.id,
+    name: f.name,
+    notes: f.notes || '',
+    carbType: f.carb_type,
+    texture: f.texture,
+    at: f.at,
+  }))
+
   if (settingsRes.data) {
     DB.settings.calorieGoal = settingsRes.data.calorie_goal
-    DB.settings.visibleSections = settingsRes.data.visible_sections || [...ALL_SECTIONS]
+    const saved = settingsRes.data.visible_sections || []
+    const newSections = ALL_SECTIONS.filter(s => !saved.includes(s))
+    const merged = newSections.length > 0 ? [...saved, ...newSections] : saved
+    DB.settings.visibleSections = merged
+    if (newSections.length > 0) {
+      supabase.from('settings').update({ visible_sections: merged }).eq('user_id', userId)
+    }
   } else {
+    DB.settings.visibleSections = [...ALL_SECTIONS]
     await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, visible_sections: ALL_SECTIONS })
   }
 
@@ -75,6 +96,8 @@ export function reset() {
   DB.meals = {}
   DB.workouts = []
   DB.lifeCalendars = []
+  DB.watchlist = []
+  DB.foodSpots = []
   DB.settings = { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] }
   loading.value = true
 }
@@ -190,6 +213,53 @@ export function saveCalendarEvents(calId, events) {
   const cal = DB.lifeCalendars.find(c => c.id === calId)
   if (cal) cal.events = events
   supabase.from('life_calendars').update({ events }).eq('id', calId).eq('user_id', uid())
+}
+
+// ── Watchlist ──────────────────────────────────────────────────
+export function addWatchItem(item) {
+  DB.watchlist.push(item)
+  supabase.from('watchlist').insert({ ...item, user_id: uid() })
+}
+
+export function updateWatchItem(id, updates) {
+  const item = DB.watchlist.find(x => x.id === id)
+  if (item) Object.assign(item, updates)
+  supabase.from('watchlist').update(updates).eq('id', id).eq('user_id', uid())
+}
+
+export function deleteWatchItem(id) {
+  DB.watchlist = DB.watchlist.filter(x => x.id !== id)
+  supabase.from('watchlist').delete().eq('id', id).eq('user_id', uid())
+}
+
+export function reorderWatchQueue(orderedIds) {
+  orderedIds.forEach((id, idx) => {
+    const item = DB.watchlist.find(x => x.id === id)
+    if (item) item.pri = idx
+    supabase.from('watchlist').update({ pri: idx }).eq('id', id).eq('user_id', uid())
+  })
+}
+
+// ── Food Spots ─────────────────────────────────────────────────
+export function addFoodSpot(spot) {
+  DB.foodSpots.unshift(spot)
+  supabase.from('food_spots').insert({ id: spot.id, name: spot.name, notes: spot.notes, carb_type: spot.carbType, texture: spot.texture, at: spot.at, user_id: uid() })
+}
+
+export function updateFoodSpot(id, updates) {
+  const spot = DB.foodSpots.find(x => x.id === id)
+  if (spot) Object.assign(spot, updates)
+  const row = {}
+  if (updates.name !== undefined) row.name = updates.name
+  if (updates.notes !== undefined) row.notes = updates.notes
+  if (updates.carbType !== undefined) row.carb_type = updates.carbType
+  if (updates.texture !== undefined) row.texture = updates.texture
+  supabase.from('food_spots').update(row).eq('id', id).eq('user_id', uid())
+}
+
+export function deleteFoodSpot(id) {
+  DB.foodSpots = DB.foodSpots.filter(x => x.id !== id)
+  supabase.from('food_spots').delete().eq('id', id).eq('user_id', uid())
 }
 
 // ── Helpers ────────────────────────────────────────────────────
