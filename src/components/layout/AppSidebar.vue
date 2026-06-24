@@ -93,6 +93,8 @@ const NAV = computed(() =>
   .nav-btn { justify-content:center; padding:9px }
   .foot-btn { justify-content:center; padding:9px }
   .logo { padding:6px 2px 18px; justify-content:center }
+  .sidebar-foot { padding:8px 2px }
+  .date-chip { display:none }
 }
 @media(max-width:600px) { .sidebar { display:none } }
 </style>

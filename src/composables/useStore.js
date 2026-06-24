@@ -157,12 +157,12 @@ export function deleteMeal(id) {
   supabase.from('meals').delete().eq('id', id).eq('user_id', uid())
 }
 
-export function saveSettings(settings) {
+export async function saveSettings(settings) {
   Object.assign(DB.settings, settings)
-  supabase.from('settings').update({
+  await supabase.from('settings').update({
     calorie_goal: DB.settings.calorieGoal,
     visible_sections: DB.settings.visibleSections,
-  }).eq('user_id', uid())
+  }).eq('user_id', uid()).select()
 }
 
 // ── Workouts ───────────────────────────────────────────────────
