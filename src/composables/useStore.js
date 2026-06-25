@@ -14,7 +14,7 @@ export const DB = reactive({
   lifeCalendars: [],
   watchlist: [],
   foodSpots: [],
-  settings: { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] },
+  settings: { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS], foodTree: null },
 })
 
 export const loading = ref(true)
@@ -73,11 +73,13 @@ export async function load() {
   }))
 
   if (settingsRes.data) {
-    DB.settings.calorieGoal = settingsRes.data.calorie_goal
+    DB.settings.calorieGoal    = settingsRes.data.calorie_goal
     DB.settings.visibleSections = settingsRes.data.visible_sections || [...ALL_SECTIONS]
+    DB.settings.foodTree        = settingsRes.data.food_tree || null
   } else {
     DB.settings.visibleSections = [...ALL_SECTIONS]
-    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, visible_sections: ALL_SECTIONS })
+    DB.settings.foodTree        = null
+    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, visible_sections: ALL_SECTIONS, food_tree: null })
   }
 
   loading.value = false
@@ -92,7 +94,7 @@ export function reset() {
   DB.lifeCalendars = []
   DB.watchlist = []
   DB.foodSpots = []
-  DB.settings = { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] }
+  DB.settings = { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS], foodTree: null }
   loading.value = true
 }
 
@@ -160,8 +162,9 @@ export function deleteMeal(id) {
 export async function saveSettings(settings) {
   Object.assign(DB.settings, settings)
   await supabase.from('settings').update({
-    calorie_goal: DB.settings.calorieGoal,
+    calorie_goal:     DB.settings.calorieGoal,
     visible_sections: DB.settings.visibleSections,
+    food_tree:        DB.settings.foodTree,
   }).eq('user_id', uid()).select()
 }
 

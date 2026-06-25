@@ -247,6 +247,12 @@ SET visible_sections = array_append(visible_sections, 'food')
 WHERE NOT ('food' = ANY(visible_sections));
 ```
 
+If you already set up Supabase before the Food node map was added, run this to add the tree column:
+
+```sql
+ALTER TABLE settings ADD COLUMN IF NOT EXISTS food_tree JSONB DEFAULT NULL;
+```
+
 ---
 
 ## Troubleshooting
