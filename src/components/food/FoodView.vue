@@ -129,7 +129,7 @@ const TEX_LBL  = { berkuah: '🥣 Berkuah', tidak: '🍳 Tidak berkuah' }
       <div class="modal">
         <div class="modal-head">{{ editId ? '✏️ Edit Favorit' : '🍜 Tambah Favorit' }}</div>
 
-        <div class="fg">
+        <div class="fg" style="margin-bottom:14px">
           <label>Nama makanan / tempat</label>
           <input type="text" v-model="fName"
                  placeholder="Mis: Nasi Goreng Pak Udin…" @keydown.enter="saveSpot" />
