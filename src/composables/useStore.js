@@ -62,7 +62,7 @@ export async function load() {
     createdAt: c.created_at,
   }))
 
-  DB.watchlist = watchlist.data || []
+  DB.watchlist = (watchlist.data || []).map(x => ({ ...x, priority: x.priority || 'want' }))
   DB.foodSpots = (foodSpots.data || []).map(f => ({
     id: f.id,
     name: f.name,

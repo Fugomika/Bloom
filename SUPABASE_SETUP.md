@@ -216,6 +216,7 @@ CREATE TABLE IF NOT EXISTS watchlist (
   title TEXT NOT NULL,
   type TEXT DEFAULT 'movie',
   status TEXT DEFAULT 'queued',
+  priority TEXT DEFAULT 'want',
   pri INTEGER DEFAULT 0,
   at BIGINT NOT NULL
 );
@@ -249,6 +250,12 @@ If you already set up Supabase before the Food node map was added, run this to a
 
 ```sql
 ALTER TABLE settings ADD COLUMN IF NOT EXISTS food_tree JSONB DEFAULT NULL;
+```
+
+If you already set up Supabase before priority scoring was added to watchlist, run this:
+
+```sql
+ALTER TABLE watchlist ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'want';
 ```
 
 If you already set up Supabase before free-form tags were added to food spots, run this:
