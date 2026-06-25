@@ -192,7 +192,7 @@ const TEX_LBL  = { berkuah: '🥣 Berkuah', tidak: '🍳 Tidak berkuah' }
 .fs-del:hover { background:rgba(239,68,68,.12); color:#EF4444 }
 
 /* ── Segment controls in modal ───────────────────────────────── */
-.fss-label { font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:8px }
+.fss-label { font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; margin-top:20px }
 .fss-row   { display:flex; gap:8px; margin-bottom:16px }
 .fss {
   flex:1; padding:10px 14px; border-radius:var(--r-sm);
