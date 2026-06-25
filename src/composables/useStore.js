@@ -67,8 +67,8 @@ export async function load() {
     id: f.id,
     name: f.name,
     notes: f.notes || '',
-    carbType: f.carb_type,
-    texture: f.texture,
+    // backward compat: if tags column empty, derive from old carb_type + texture
+    tags: (f.tags && f.tags.length) ? f.tags : [f.carb_type, f.texture].filter(Boolean),
     at: f.at,
   }))
 
@@ -240,17 +240,16 @@ export function reorderWatchQueue(orderedIds) {
 // ── Food Spots ─────────────────────────────────────────────────
 export function addFoodSpot(spot) {
   DB.foodSpots.unshift(spot)
-  supabase.from('food_spots').insert({ id: spot.id, name: spot.name, notes: spot.notes, carb_type: spot.carbType, texture: spot.texture, at: spot.at, user_id: uid() })
+  supabase.from('food_spots').insert({ id: spot.id, name: spot.name, notes: spot.notes, tags: spot.tags || [], at: spot.at, user_id: uid() })
 }
 
 export function updateFoodSpot(id, updates) {
   const spot = DB.foodSpots.find(x => x.id === id)
   if (spot) Object.assign(spot, updates)
   const row = {}
-  if (updates.name !== undefined) row.name = updates.name
+  if (updates.name  !== undefined) row.name  = updates.name
   if (updates.notes !== undefined) row.notes = updates.notes
-  if (updates.carbType !== undefined) row.carb_type = updates.carbType
-  if (updates.texture !== undefined) row.texture = updates.texture
+  if (updates.tags  !== undefined) row.tags  = updates.tags
   supabase.from('food_spots').update(row).eq('id', id).eq('user_id', uid())
 }
 

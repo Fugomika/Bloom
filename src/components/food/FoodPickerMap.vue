@@ -3,11 +3,10 @@ import { ref, computed } from 'vue'
 import { uid } from '../../utils/date.js'
 
 // ── Layout constants ────────────────────────────────────────────
-const NODE_R  = 32   // circle radius (px, in SVG coordinate space)
-const LAYER_H = 130  // vertical gap between layers
+const NODE_R  = 32
+const LAYER_H = 130
 const TOP_PAD = 56
 const BOT_PAD = 32
-const SVG_W   = 560  // internal coordinate width
 
 const props = defineProps({
   tree:      { type: Object, required: true },
@@ -16,20 +15,22 @@ const props = defineProps({
 const emit = defineEmits(['update:tree'])
 
 // ── Traversal state ─────────────────────────────────────────────
-const path       = ref([props.tree.id])  // IDs from root → current leaf
+const path       = ref([props.tree.id])
 const rerollSeed = ref(0)
 
 // ── Edit state ──────────────────────────────────────────────────
-const editMode     = ref(false)
-const editForm     = ref(null)    // { id, label, icon, tag } or null
-const addParentId  = ref(null)    // node ID we're adding a child to
-const newChild     = ref({ label: '', icon: '⭐', tag: '' })
+const editMode    = ref(false)
+const editForm    = ref(null)
+const addParentId = ref(null)
+const newChild    = ref({ label: '', icon: '⭐', tag: '' })
 
 // ── Layout algorithm ─────────────────────────────────────────────
 function countLeaves(node) {
   if (!node.children?.length) return 1
   return node.children.reduce((s, c) => s + countLeaves(c), 0)
 }
+
+const svgW = computed(() => Math.max(560, countLeaves(props.tree) * 90))
 
 function assignPos(node, xMin, xMax, depth) {
   node.x = (xMin + xMax) / 2
@@ -46,11 +47,10 @@ function assignPos(node, xMin, xMax, depth) {
 
 const layoutTree = computed(() => {
   const clone = JSON.parse(JSON.stringify(props.tree))
-  assignPos(clone, 0, SVG_W, 0)
+  assignPos(clone, 0, svgW.value, 0)
   return clone
 })
 
-// Flat list of all nodes (with computed x/y)
 const flat = computed(() => {
   const out = []
   function walk(n) { out.push(n); (n.children || []).forEach(walk) }
@@ -102,7 +102,6 @@ function clickNode(node) {
   if (editMode.value) return
   const idx = path.value.indexOf(node.id)
   if (idx >= 0) {
-    // Deselect: backtrack to before this node
     const prev = path.value.slice(0, idx)
     path.value = prev.length ? prev : [props.tree.id]
   } else if (availIds.value.has(node.id)) {
@@ -123,8 +122,7 @@ const result = computed(() => {
 
   const matches = props.foodSpots.filter(s => {
     if (!tags.length) return true
-    // built-in carb+texture tags, plus optional customTags array
-    const sTags = new Set([s.carbType, s.texture, ...(s.customTags || [])].filter(Boolean))
+    const sTags = new Set(s.tags || [])
     return tags.every(t => sTags.has(t))
   })
 
@@ -134,9 +132,6 @@ const result = computed(() => {
 })
 
 function reroll() { rerollSeed.value++ }
-
-const CARB_LBL = { nasi: '🍚 Nasi', 'non-nasi': '🥗 Non-nasi' }
-const TEX_LBL  = { berkuah: '🥣 Berkuah', tidak: '🍳 Tidak berkuah' }
 
 // ── Edit helpers ─────────────────────────────────────────────────
 function deepClone() { return JSON.parse(JSON.stringify(props.tree)) }
@@ -211,12 +206,12 @@ function deleteLeaf(nodeId) {
 
   <!-- Dark game-map canvas -->
   <div class="pm-outer">
-    <div class="pm-canvas" :style="{ height: svgH + 'px', minWidth: SVG_W + 'px' }">
+    <div class="pm-canvas" :style="{ height: svgH + 'px', minWidth: svgW + 'px' }">
 
       <!-- SVG connection layer -->
       <svg class="pm-svg"
-           :viewBox="`0 0 ${SVG_W} ${svgH}`"
-           :width="SVG_W" :height="svgH"
+           :viewBox="`0 0 ${svgW} ${svgH}`"
+           :width="svgW" :height="svgH"
            xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="pm-glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -245,10 +240,10 @@ function deleteLeaf(nodeId) {
 
         <!-- Edit-mode controls -->
         <div v-if="editMode" class="pm-ctrl" @click.stop>
-          <button class="pm-cb pm-cb-edit" title="Edit node"      @click="startEdit(node)">✎</button>
-          <button class="pm-cb pm-cb-add"  title="Add branch"     @click="startAddChild(node.id)">＋</button>
+          <button class="pm-cb pm-cb-edit" title="Edit node"  @click="startEdit(node)">✎</button>
+          <button class="pm-cb pm-cb-add"  title="Add branch" @click="startAddChild(node.id)">＋</button>
           <button v-if="!(node.children?.length) && node.id !== tree.id"
-                  class="pm-cb pm-cb-del"  title="Delete"
+                  class="pm-cb pm-cb-del" title="Delete"
                   @click="deleteLeaf(node.id)">✕</button>
         </div>
       </div>
@@ -269,9 +264,8 @@ function deleteLeaf(nodeId) {
         <div class="pm-res-title">Makan ini yuk!</div>
         <div class="pm-res-name">{{ result.spot.name }}</div>
         <div v-if="result.spot.notes" class="pm-res-notes">{{ result.spot.notes }}</div>
-        <div class="pm-res-tags">
-          <span class="pm-res-tag">{{ CARB_LBL[result.spot.carbType] }}</span>
-          <span class="pm-res-tag">{{ TEX_LBL[result.spot.texture] }}</span>
+        <div v-if="result.spot.tags?.length" class="pm-res-tags">
+          <span v-for="tag in result.spot.tags" :key="tag" class="pm-res-tag">{{ tag }}</span>
         </div>
         <div class="pm-res-acts">
           <button class="btn btn-ghost" @click="reroll">🎲 Pilih lain</button>

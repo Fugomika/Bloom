@@ -120,8 +120,7 @@ CREATE TABLE food_spots (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   notes TEXT DEFAULT '',
-  carb_type TEXT DEFAULT 'nasi',
-  texture TEXT DEFAULT 'tidak',
+  tags TEXT[] DEFAULT '{}',
   at BIGINT NOT NULL
 );
 ```
@@ -226,8 +225,7 @@ CREATE TABLE IF NOT EXISTS food_spots (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   notes TEXT DEFAULT '',
-  carb_type TEXT DEFAULT 'nasi',
-  texture TEXT DEFAULT 'tidak',
+  tags TEXT[] DEFAULT '{}',
   at BIGINT NOT NULL
 );
 
@@ -251,6 +249,18 @@ If you already set up Supabase before the Food node map was added, run this to a
 
 ```sql
 ALTER TABLE settings ADD COLUMN IF NOT EXISTS food_tree JSONB DEFAULT NULL;
+```
+
+If you already set up Supabase before free-form tags were added to food spots, run this:
+
+```sql
+-- Add tags column (array of text)
+ALTER TABLE food_spots ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
+
+-- Backfill existing rows from the old carb_type + texture columns
+UPDATE food_spots
+SET tags = ARRAY[carb_type, texture]
+WHERE tags = '{}' AND (carb_type IS NOT NULL OR texture IS NOT NULL);
 ```
 
 ---
