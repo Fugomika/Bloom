@@ -216,12 +216,14 @@ export function saveCalendarEvents(calId, events) {
 export function addWatchItem(item) {
   DB.watchlist.push(item)
   supabase.from('watchlist').insert({ ...item, user_id: uid() })
+    .then(({ error }) => { if (error) console.error('[Bloom] watchlist insert failed:', error) })
 }
 
 export function updateWatchItem(id, updates) {
   const item = DB.watchlist.find(x => x.id === id)
   if (item) Object.assign(item, updates)
   supabase.from('watchlist').update(updates).eq('id', id).eq('user_id', uid())
+    .then(({ error }) => { if (error) console.error('[Bloom] watchlist update failed:', error) })
 }
 
 export function deleteWatchItem(id) {
