@@ -226,7 +226,7 @@ function startWatching() {
       <div class="modal">
         <div class="modal-head">{{ editId ? '✏️ Edit Tontonan' : '🎬 Tambah ke Watchlist' }}</div>
 
-        <div class="fg">
+        <div class="fg" style="margin-bottom:16px">
           <label>Judul</label>
           <input type="text" v-model="fTitle" placeholder="Nama film atau serial…" @keydown.enter="save" />
         </div>
