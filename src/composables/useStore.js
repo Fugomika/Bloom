@@ -21,6 +21,12 @@ export const loading = ref(true)
 
 function uid() { return user.value?.id }
 
+// Supabase JS v2 query builders are lazy thenables — the HTTP request only fires
+// when .then() is called. Without it, the query is never sent.
+function dbRun(query) {
+  query.then(({ error }) => { if (error) console.error('[Bloom] DB error:', error) })
+}
+
 // ── Load ───────────────────────────────────────────────────────
 export async function load() {
   const userId = uid()
@@ -101,35 +107,35 @@ export function reset() {
 // ── Tasks ──────────────────────────────────────────────────────
 export function addTask(task) {
   DB.tasks.unshift(task)
-  supabase.from('tasks').insert({ ...task, user_id: uid() })
+  dbRun(supabase.from('tasks').insert({ ...task, user_id: uid() }))
 }
 
 export function updateTask(id, updates) {
   const t = DB.tasks.find(x => x.id === id)
   if (t) Object.assign(t, updates)
-  supabase.from('tasks').update(updates).eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('tasks').update(updates).eq('id', id).eq('user_id', uid()))
 }
 
 export function deleteTask(id) {
   DB.tasks = DB.tasks.filter(x => x.id !== id)
-  supabase.from('tasks').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('tasks').delete().eq('id', id).eq('user_id', uid()))
 }
 
 // ── Habits ─────────────────────────────────────────────────────
 export function addHabit(habit) {
   DB.habits.push(habit)
-  supabase.from('habits').insert({ ...habit, ins: habit.ins || [], user_id: uid() })
+  dbRun(supabase.from('habits').insert({ ...habit, ins: habit.ins || [], user_id: uid() }))
 }
 
 export function updateHabitIns(id, ins) {
   const h = DB.habits.find(x => x.id === id)
   if (h) h.ins = ins
-  supabase.from('habits').update({ ins }).eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('habits').update({ ins }).eq('id', id).eq('user_id', uid()))
 }
 
 export function deleteHabit(id) {
   DB.habits = DB.habits.filter(x => x.id !== id)
-  supabase.from('habits').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('habits').delete().eq('id', id).eq('user_id', uid()))
 }
 
 // ── Notes ──────────────────────────────────────────────────────
@@ -137,12 +143,12 @@ export function upsertNote(note) {
   const idx = DB.notes.findIndex(x => x.id === note.id)
   if (idx >= 0) DB.notes[idx] = note
   else DB.notes.unshift(note)
-  supabase.from('notes').upsert({ ...note, user_id: uid() })
+  dbRun(supabase.from('notes').upsert({ ...note, user_id: uid() }))
 }
 
 export function deleteNote(id) {
   DB.notes = DB.notes.filter(x => x.id !== id)
-  supabase.from('notes').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('notes').delete().eq('id', id).eq('user_id', uid()))
 }
 
 // ── Meals ──────────────────────────────────────────────────────
@@ -150,13 +156,13 @@ export function addMeal(meal) {
   const t = today()
   if (!DB.meals[t]) DB.meals[t] = []
   DB.meals[t].push(meal)
-  supabase.from('meals').insert({ ...meal, date: t, user_id: uid() })
+  dbRun(supabase.from('meals').insert({ ...meal, date: t, user_id: uid() }))
 }
 
 export function deleteMeal(id) {
   const t = today()
   if (DB.meals[t]) DB.meals[t] = DB.meals[t].filter(m => m.id !== id)
-  supabase.from('meals').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('meals').delete().eq('id', id).eq('user_id', uid()))
 }
 
 export async function saveSettings(settings) {
@@ -171,12 +177,12 @@ export async function saveSettings(settings) {
 // ── Workouts ───────────────────────────────────────────────────
 export function addWorkout(workout) {
   DB.workouts.unshift(workout)
-  supabase.from('workouts').insert({ ...workout, exercises: workout.exercises, user_id: uid() })
+  dbRun(supabase.from('workouts').insert({ ...workout, exercises: workout.exercises, user_id: uid() }))
 }
 
 export function deleteWorkout(id) {
   DB.workouts = DB.workouts.filter(x => x.id !== id)
-  supabase.from('workouts').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('workouts').delete().eq('id', id).eq('user_id', uid()))
 }
 
 // ── Life Calendars ─────────────────────────────────────────────
@@ -198,51 +204,49 @@ export function upsertCalendar(cal) {
   const idx = DB.lifeCalendars.findIndex(c => c.id === cal.id)
   if (idx >= 0) DB.lifeCalendars[idx] = cal
   else DB.lifeCalendars.push(cal)
-  supabase.from('life_calendars').upsert(calToRow(cal))
+  dbRun(supabase.from('life_calendars').upsert(calToRow(cal)))
 }
 
 export function deleteCalendar(id) {
   DB.lifeCalendars = DB.lifeCalendars.filter(c => c.id !== id)
-  supabase.from('life_calendars').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('life_calendars').delete().eq('id', id).eq('user_id', uid()))
 }
 
 export function saveCalendarEvents(calId, events) {
   const cal = DB.lifeCalendars.find(c => c.id === calId)
   if (cal) cal.events = events
-  supabase.from('life_calendars').update({ events }).eq('id', calId).eq('user_id', uid())
+  dbRun(supabase.from('life_calendars').update({ events }).eq('id', calId).eq('user_id', uid()))
 }
 
 // ── Watchlist ──────────────────────────────────────────────────
 export function addWatchItem(item) {
   DB.watchlist.push(item)
-  supabase.from('watchlist').insert({ ...item, user_id: uid() })
-    .then(({ error }) => { if (error) console.error('[Bloom] watchlist insert failed:', error) })
+  dbRun(supabase.from('watchlist').insert({ ...item, user_id: uid() }))
 }
 
 export function updateWatchItem(id, updates) {
   const item = DB.watchlist.find(x => x.id === id)
   if (item) Object.assign(item, updates)
-  supabase.from('watchlist').update(updates).eq('id', id).eq('user_id', uid())
-    .then(({ error }) => { if (error) console.error('[Bloom] watchlist update failed:', error) })
+  dbRun(supabase.from('watchlist').update(updates).eq('id', id).eq('user_id', uid()))
 }
 
 export function deleteWatchItem(id) {
   DB.watchlist = DB.watchlist.filter(x => x.id !== id)
-  supabase.from('watchlist').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('watchlist').delete().eq('id', id).eq('user_id', uid()))
 }
 
 export function reorderWatchQueue(orderedIds) {
   orderedIds.forEach((id, idx) => {
     const item = DB.watchlist.find(x => x.id === id)
     if (item) item.pri = idx
-    supabase.from('watchlist').update({ pri: idx }).eq('id', id).eq('user_id', uid())
+    dbRun(supabase.from('watchlist').update({ pri: idx }).eq('id', id).eq('user_id', uid()))
   })
 }
 
 // ── Food Spots ─────────────────────────────────────────────────
 export function addFoodSpot(spot) {
   DB.foodSpots.unshift(spot)
-  supabase.from('food_spots').insert({ id: spot.id, name: spot.name, notes: spot.notes, tags: spot.tags || [], at: spot.at, user_id: uid() })
+  dbRun(supabase.from('food_spots').insert({ id: spot.id, name: spot.name, notes: spot.notes, tags: spot.tags || [], at: spot.at, user_id: uid() }))
 }
 
 export function updateFoodSpot(id, updates) {
@@ -252,12 +256,12 @@ export function updateFoodSpot(id, updates) {
   if (updates.name  !== undefined) row.name  = updates.name
   if (updates.notes !== undefined) row.notes = updates.notes
   if (updates.tags  !== undefined) row.tags  = updates.tags
-  supabase.from('food_spots').update(row).eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('food_spots').update(row).eq('id', id).eq('user_id', uid()))
 }
 
 export function deleteFoodSpot(id) {
   DB.foodSpots = DB.foodSpots.filter(x => x.id !== id)
-  supabase.from('food_spots').delete().eq('id', id).eq('user_id', uid())
+  dbRun(supabase.from('food_spots').delete().eq('id', id).eq('user_id', uid()))
 }
 
 // ── Helpers ────────────────────────────────────────────────────
