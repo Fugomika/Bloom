@@ -107,6 +107,12 @@ const EMPTY_MSG = {
 }
 
 // ── Picker ───────────────────────────────────────────────────────
+const deleteConfirmId = ref(null)
+
+function confirmDelete(id) { deleteConfirmId.value = id }
+function cancelDelete()    { deleteConfirmId.value = null }
+function executeDelete(id) { deleteWatchItem(id); deleteConfirmId.value = null }
+
 const showPicker    = ref(false)
 const pickerMood    = ref('all')
 const pickerSeed    = ref(0)
@@ -202,15 +208,25 @@ function startWatching() {
             </div>
           </div>
 
-          <div v-if="item.status === 'queued'" class="wl-arrows">
-            <button class="wl-arr" @click.stop="moveUp(item)"   title="Naikkan urutan">▲</button>
-            <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">▼</button>
-          </div>
+          <!-- Inline delete confirmation -->
+          <template v-if="deleteConfirmId === item.id">
+            <div class="wl-confirm">
+              <span class="wl-confirm-text">Hapus?</span>
+              <button class="wl-confirm-yes" @click.stop="executeDelete(item.id)">Hapus</button>
+              <button class="wl-confirm-no"  @click.stop="cancelDelete()">Batal</button>
+            </div>
+          </template>
 
-          <button class="wl-action" @click.stop="cycleStatus(item)" :title="NEXT_TITLE[item.status]">
-            {{ NEXT_ICON[item.status] }}
-          </button>
-          <button class="wl-del" @click.stop="deleteWatchItem(item.id)">✕</button>
+          <template v-else>
+            <div v-if="item.status === 'queued'" class="wl-arrows">
+              <button class="wl-arr" @click.stop="moveUp(item)"   title="Naikkan urutan">▲</button>
+              <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">▼</button>
+            </div>
+            <button class="wl-action" @click.stop="cycleStatus(item)" :title="NEXT_TITLE[item.status]">
+              {{ NEXT_ICON[item.status] }}
+            </button>
+            <button class="wl-del" @click.stop="confirmDelete(item.id)">✕</button>
+          </template>
         </div>
       </template>
 
@@ -392,11 +408,29 @@ function startWatching() {
 
 .wl-del {
   width:28px; height:28px; border:none; background:transparent; border-radius:7px;
-  cursor:pointer; color:var(--muted); font-size:11px; opacity:0; transition:all .15s;
-  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--muted); font-size:11px; opacity:.35; transition:all .15s;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
 .wl-card:hover .wl-del { opacity:1 }
 .wl-del:hover { background:rgba(239,68,68,.12); color:#EF4444 }
+
+/* ── Inline delete confirm ───────────────────────────────────── */
+.wl-confirm {
+  display:flex; align-items:center; gap:6px; flex-shrink:0; animation:fadeUp .15s ease;
+}
+.wl-confirm-text { font-size:11px; font-weight:800; color:var(--muted); white-space:nowrap }
+.wl-confirm-yes {
+  padding:5px 10px; border-radius:7px; border:none; cursor:pointer;
+  background:#EF4444; color:#fff; font-family:'Nunito',sans-serif;
+  font-size:11px; font-weight:900; transition:all .15s;
+}
+.wl-confirm-yes:hover { background:#DC2626 }
+.wl-confirm-no {
+  padding:5px 10px; border-radius:7px; border:1.5px solid var(--border); cursor:pointer;
+  background:var(--surface); color:var(--muted); font-family:'Nunito',sans-serif;
+  font-size:11px; font-weight:800; transition:all .15s;
+}
+.wl-confirm-no:hover { border-color:var(--sun); color:var(--sun-dk) }
 
 /* ── Modal segments ──────────────────────────────────────────── */
 .wl-seg-label { font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; margin-top:4px }
