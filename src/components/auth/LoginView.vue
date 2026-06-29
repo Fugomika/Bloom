@@ -194,7 +194,8 @@ async function submit() {
   flex: 1;
   border: none;
   background: transparent;
-  padding: 13px 0;
+  padding: 13px;
+  padding-left: 10px;
   font-family: 'Nunito', sans-serif;
   font-size: 14px;
   font-weight: 700;

@@ -22,7 +22,6 @@ const ALL_NAV = [
   { s: 'notes',     icon: '📝', label: 'Notes' },
   { s: 'life',      icon: '📅', label: 'Life' },
   { s: 'watchlist', icon: '🎬', label: 'Watchlist' },
-  { s: 'food',      icon: '🍜', label: 'Food Picks' },
 ]
 
 const NAV = computed(() =>
@@ -79,7 +78,6 @@ const NAV = computed(() =>
 .nav-btn[data-s="notes"]     .nav-icon { background:linear-gradient(135deg,#8B5CF6,#7C3AED) }
 .nav-btn[data-s="life"]      .nav-icon { background:linear-gradient(135deg,#34D399,#818CF8) }
 .nav-btn[data-s="watchlist"] .nav-icon { background:linear-gradient(135deg,#EC4899,#DB2777) }
-.nav-btn[data-s="food"]      .nav-icon { background:linear-gradient(135deg,#FBBF24,#F97316) }
 .sidebar-foot { margin-top:auto; padding:10px; display:flex; flex-direction:column; gap:6px }
 .foot-btn { width:100%; display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); border:none; background:none; cursor:pointer; color:rgba(255,255,255,.38); font-family:'Nunito',sans-serif; font-size:13.5px; font-weight:700; text-align:left; transition:all .18s }
 .foot-btn:hover { background:var(--sidebar-hover); color:rgba(255,255,255,.7) }
