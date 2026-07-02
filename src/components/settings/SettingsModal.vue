@@ -14,6 +14,7 @@ const SECTION_META = {
   notes:     { icon: '📝', label: 'Notes',     grad: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
   life:      { icon: '📅', label: 'Life',      grad: 'linear-gradient(135deg,#34D399,#818CF8)' },
   watchlist: { icon: '🎬', label: 'Watchlist', grad: 'linear-gradient(135deg,#EC4899,#DB2777)' },
+  finance:   { icon: '💰', label: 'Finance',   grad: 'linear-gradient(135deg,#22C55E,#15803D)' },
 }
 
 const sections = computed(() => ALL_SECTIONS.map(s => ({

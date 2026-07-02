@@ -14,6 +14,7 @@ const ALL_NAV = [
   { s: 'notes',     icon: '📝', label: 'Notes' },
   { s: 'life',      icon: '📅', label: 'Life' },
   { s: 'watchlist', icon: '🎬', label: 'Watch' },
+  { s: 'finance',   icon: '💰', label: 'Finance' },
 ]
 
 const NAV = computed(() =>

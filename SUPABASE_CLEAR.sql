@@ -2,6 +2,7 @@
 -- After running this, run SUPABASE_INIT.sql to recreate from scratch.
 
 DROP TABLE IF EXISTS food_spots;
+DROP TABLE IF EXISTS finance_transactions;
 DROP TABLE IF EXISTS watchlist;
 DROP TABLE IF EXISTS life_calendars;
 DROP TABLE IF EXISTS workouts;

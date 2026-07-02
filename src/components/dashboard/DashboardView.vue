@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { DB, todayKcal, updateTask, updateHabitIns } from '../../composables/useStore.js'
-import { streak, today } from '../../utils/date.js'
+import { streak, today, thisYM, fmtIDR } from '../../utils/date.js'
 import { MONTHS, DAYS } from '../../utils/constants.js'
 import { confetti } from '../../composables/useConfetti.js'
 
@@ -26,6 +26,11 @@ const todayWkt    = computed(() => DB.workouts.filter(w => w.date === t))
 const kcal = computed(() => todayKcal())
 const goal = computed(() => DB.settings.calorieGoal)
 const calPct = computed(() => Math.min(kcal.value / goal.value, 1))
+
+const finThisMonth  = computed(() => DB.finance.filter(t => t.date.slice(0, 7) === thisYM()))
+const finIncome     = computed(() => finThisMonth.value.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0))
+const finExpense    = computed(() => finThisMonth.value.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0))
+const finBalance    = computed(() => DB.finance.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0))
 
 function qToggle(id) {
   const task = DB.tasks.find(x => x.id === id)
@@ -117,6 +122,18 @@ function qHabit(id) {
         <div v-else style="color:var(--muted);font-weight:700;font-size:13px;padding:10px 0">No workouts today 🏋️</div>
       </div>
 
+      <!-- Finance -->
+      <div class="card">
+        <div class="widget-title">💰 Finance Bulan Ini</div>
+        <div class="fin-mini-row">
+          <div class="fin-mini fin-mini-in"><span>💵</span><span>{{ fmtIDR(finIncome) }}</span><div class="fin-mini-lbl">Masuk</div></div>
+          <div class="fin-mini fin-mini-out"><span>🧾</span><span>{{ fmtIDR(finExpense) }}</span><div class="fin-mini-lbl">Keluar</div></div>
+        </div>
+        <div class="fin-mini-balance" :class="finBalance >= 0 ? 'fin-mini-pos' : 'fin-mini-neg'">
+          Saldo total: {{ fmtIDR(finBalance) }}
+        </div>
+      </div>
+
       <!-- Recent Notes -->
       <div class="card dash-full">
         <div class="widget-title">📝 Recent Notes</div>
@@ -157,6 +174,15 @@ function qHabit(id) {
 .chk { width:22px; height:22px; border-radius:7px; border:2.5px solid #D1D5DB; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .18s; user-select:none }
 .chk:hover:not(.on) { border-color:var(--sun); background:var(--sun-lt) }
 .chk.on { background:var(--sun); border-color:var(--sun); color:#1A0E00; font-weight:900 }
+.fin-mini-row { display:flex; gap:10px; margin-bottom:10px }
+.fin-mini { flex:1; background:var(--bg); border-radius:var(--r-sm); padding:10px 12px; text-align:center; font-family:'Fredoka One',cursive; font-size:14px }
+.fin-mini span:first-child { display:block; font-size:16px; font-family:'Nunito',sans-serif; margin-bottom:2px }
+.fin-mini-lbl { font-size:9px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); font-family:'Nunito',sans-serif; margin-top:2px }
+.fin-mini-in  { color:var(--leaf-dk) }
+.fin-mini-out { color:#DC2626 }
+.fin-mini-balance { font-size:12px; font-weight:800; text-align:center; padding:6px 0 0 }
+.fin-mini-pos { color:var(--leaf-dk) }
+.fin-mini-neg { color:#DC2626 }
 @media(max-width:960px) {
   .stats-row { grid-template-columns:1fr 1fr }
   .dash-grid  { grid-template-columns:1fr }

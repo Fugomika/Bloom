@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 
-const VALID = ['dashboard', 'tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist']
+const VALID = ['dashboard', 'tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance']
 
 function fromHash() {
   const h = location.hash.slice(1)

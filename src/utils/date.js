@@ -51,6 +51,14 @@ export function last7() {
   })
 }
 
+export function fmtIDR(n) {
+  return 'Rp' + Math.round(n || 0).toLocaleString('id-ID')
+}
+
+export function thisYM() {
+  return today().slice(0, 7)
+}
+
 export function eventDuration(ev) {
   const [sy, sm] = ev.start.split('-').map(Number)
   const now = new Date()

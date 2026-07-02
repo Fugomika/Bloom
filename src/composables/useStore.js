@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { user } from './useAuth.js'
 import { today } from '../utils/date.js'
 
-export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist']
+export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance']
 
 export const DB = reactive({
   tasks: [],
@@ -13,7 +13,8 @@ export const DB = reactive({
   workouts: [],
   lifeCalendars: [],
   watchlist: [],
-  settings: { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] },
+  finance: [],
+  settings: { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS] },
 })
 
 export const loading = ref(true)
@@ -32,7 +33,7 @@ export async function load() {
   if (!userId) return
   loading.value = true
 
-  const [tasks, habits, notes, meals, workouts, calendars, watchlist, settingsRes] = await Promise.all([
+  const [tasks, habits, notes, meals, workouts, calendars, watchlist, finance, settingsRes] = await Promise.all([
     supabase.from('tasks').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('habits').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('notes').select('*').eq('user_id', userId).order('at', { ascending: false }),
@@ -40,6 +41,7 @@ export async function load() {
     supabase.from('workouts').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('life_calendars').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
     supabase.from('watchlist').select('*').eq('user_id', userId).order('pri', { ascending: true }),
+    supabase.from('finance_transactions').select('*').eq('user_id', userId).order('date', { ascending: false }),
     supabase.from('settings').select('*').eq('user_id', userId).maybeSingle(),
   ])
 
@@ -68,12 +70,15 @@ export async function load() {
 
   DB.watchlist = (watchlist.data || []).map(x => ({ ...x, priority: x.priority || 'want' }))
 
+  DB.finance = finance.data || []
+
   if (settingsRes.data) {
     DB.settings.calorieGoal     = settingsRes.data.calorie_goal
+    DB.settings.financeBudgets  = settingsRes.data.finance_budgets || {}
     DB.settings.visibleSections = settingsRes.data.visible_sections?.filter(s => s !== 'food') || [...ALL_SECTIONS]
   } else {
     DB.settings.visibleSections = [...ALL_SECTIONS]
-    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, visible_sections: ALL_SECTIONS })
+    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, finance_budgets: {}, visible_sections: ALL_SECTIONS })
   }
 
   loading.value = false
@@ -87,7 +92,8 @@ export function reset() {
   DB.workouts = []
   DB.lifeCalendars = []
   DB.watchlist = []
-  DB.settings = { calorieGoal: 2000, visibleSections: [...ALL_SECTIONS] }
+  DB.finance = []
+  DB.settings = { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS] }
   loading.value = true
 }
 
@@ -156,6 +162,7 @@ export async function saveSettings(settings) {
   Object.assign(DB.settings, settings)
   await supabase.from('settings').update({
     calorie_goal:     DB.settings.calorieGoal,
+    finance_budgets:  DB.settings.financeBudgets,
     visible_sections: DB.settings.visibleSections,
   }).eq('user_id', uid()).select()
 }
@@ -227,6 +234,23 @@ export function reorderWatchQueue(orderedIds) {
     if (item) item.pri = idx
     dbRun(supabase.from('watchlist').update({ pri: idx }).eq('id', id).eq('user_id', uid()))
   })
+}
+
+// ── Finance ────────────────────────────────────────────────────
+export function addTransaction(tx) {
+  DB.finance.unshift(tx)
+  dbRun(supabase.from('finance_transactions').insert({ ...tx, user_id: uid() }))
+}
+
+export function updateTransaction(id, updates) {
+  const t = DB.finance.find(x => x.id === id)
+  if (t) Object.assign(t, updates)
+  dbRun(supabase.from('finance_transactions').update(updates).eq('id', id).eq('user_id', uid()))
+}
+
+export function deleteTransaction(id) {
+  DB.finance = DB.finance.filter(x => x.id !== id)
+  dbRun(supabase.from('finance_transactions').delete().eq('id', id).eq('user_id', uid()))
 }
 
 // ── Helpers ────────────────────────────────────────────────────

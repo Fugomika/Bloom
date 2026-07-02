@@ -74,11 +74,23 @@ CREATE TABLE watchlist (
   at       BIGINT NOT NULL
 );
 
--- One row per user — stores calorie goal and which sections are visible
+CREATE TABLE finance_transactions (
+  id       TEXT PRIMARY KEY,
+  user_id  UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  type     TEXT NOT NULL DEFAULT 'expense',
+  amount   NUMERIC NOT NULL DEFAULT 0,
+  category TEXT NOT NULL DEFAULT 'other_exp',
+  note     TEXT DEFAULT '',
+  date     TEXT NOT NULL,
+  at       BIGINT NOT NULL
+);
+
+-- One row per user — stores calorie goal, finance budgets, and which sections are visible
 CREATE TABLE settings (
   user_id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   calorie_goal     INTEGER DEFAULT 2000,
-  visible_sections TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist']
+  finance_budgets  JSONB   DEFAULT '{}',
+  visible_sections TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','finance']
 );
 
 -- ── Row Level Security ────────────────────────────────────────────
@@ -90,6 +102,7 @@ ALTER TABLE meals          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE workouts       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE life_calendars ENABLE ROW LEVEL SECURITY;
 ALTER TABLE watchlist      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE finance_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings       ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "own tasks"       ON tasks          FOR ALL USING (auth.uid() = user_id);
@@ -99,4 +112,5 @@ CREATE POLICY "own meals"       ON meals          FOR ALL USING (auth.uid() = us
 CREATE POLICY "own workouts"    ON workouts       FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own calendars"   ON life_calendars FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own watchlist"   ON watchlist      FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own finance_transactions" ON finance_transactions FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own settings"    ON settings       FOR ALL USING (auth.uid() = user_id);
