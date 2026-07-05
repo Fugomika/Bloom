@@ -351,6 +351,9 @@ const EMPTY_MSG = {
 
 /* ── Layout ──────────────────────────────────────────────────── */
 .fin-grid { display:grid; grid-template-columns:1.6fr 1fr; gap:18px; align-items:start }
+/* fr tracks default to minmax(auto,…): without min-width:0 the nowrap
+   note text sets the column's minimum and forces horizontal scroll on mobile */
+.fin-col-main, .fin-col-side { min-width:0 }
 
 /* ── Transaction list ────────────────────────────────────────── */
 .fin-list { display:flex; flex-direction:column; gap:18px }
@@ -437,5 +440,8 @@ const EMPTY_MSG = {
   .fin-stats { grid-template-columns:1fr; gap:9px }
   .fin-budget-btn { margin-left:0 }
   .fin-cat-grid { grid-template-columns:repeat(3,1fr) }
+  .fin-item { padding:10px 12px; gap:10px }
+  .fin-amount { font-size:13px }
+  .fin-del { opacity:.6 }
 }
 </style>
