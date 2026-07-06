@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { DB, addTask as storeAddTask, updateTask, deleteTask } from '../../composables/useStore.js'
 import { uid, fmtDate, overdue } from '../../utils/date.js'
 import { confetti } from '../../composables/useConfetti.js'
+import AppIcon from '../ui/AppIcon.vue'
 
 const tFilter = ref('all')
 const tInput = ref('')
@@ -30,20 +31,20 @@ function setFilter(f) { tFilter.value = f }
 
 <template>
   <div>
-    <div class="sec-head"><h1>📋 My Tasks</h1><p>Stay on top of what matters</p></div>
+    <div class="sec-head"><h1>My Tasks</h1><p>Stay on top of what matters</p></div>
 
     <div class="card" style="margin-bottom:16px">
       <div class="form-row">
         <div class="fg" style="flex:2;min-width:180px">
           <label>Task</label>
-          <input type="text" v-model="tInput" placeholder="What needs to be done? ✨" @keydown.enter="addTask"/>
+          <input type="text" v-model="tInput" placeholder="What needs to be done?" @keydown.enter="addTask"/>
         </div>
         <div class="fg">
           <label>Priority</label>
           <select v-model="tPri">
-            <option value="medium">🟡 Medium</option>
-            <option value="high">🔴 High</option>
-            <option value="low">🟢 Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="low">Low</option>
           </select>
         </div>
         <div class="fg"><label>Due Date</label><input type="date" v-model="tDue"/></div>
@@ -62,9 +63,9 @@ function setFilter(f) { tFilter.value = f }
         <div v-for="x in filtered" :key="x.id" class="task-item" :class="{ done: x.done }">
           <div class="chk" :class="{ on: x.done }" @click="toggleTask(x.id)">{{ x.done ? '✓' : '' }}</div>
           <span class="task-title">{{ x.title }}</span>
-          <span v-if="x.due" class="due" :class="{ late: overdue(x.due) && !x.done }">📅 {{ fmtDate(x.due) }}</span>
+          <span v-if="x.due" class="due" :class="{ late: overdue(x.due) && !x.done }"><AppIcon name="calendar" :size="11" /> {{ fmtDate(x.due) }}</span>
           <span class="badge" :class="`b-${x.pri}`">{{ x.pri }}</span>
-          <button class="del-btn" @click="delTask(x.id)">🗑️</button>
+          <button class="del-btn" @click="delTask(x.id)"><AppIcon name="trash" :size="14" /></button>
         </div>
       </template>
       <div v-else class="empty">
@@ -86,9 +87,9 @@ function setFilter(f) { tFilter.value = f }
 .chk:hover:not(.on) { border-color:var(--sun); background:var(--sun-lt) }
 .chk.on { background:var(--sun); border-color:var(--sun); color:#1A0E00; font-weight:900 }
 .task-title { flex:1; font-weight:700; font-size:14px }
-.due { font-size:11px; font-weight:800; color:var(--muted); white-space:nowrap }
+.due { font-size:11px; font-weight:800; color:var(--muted); white-space:nowrap; display:inline-flex; align-items:center; gap:4px }
 .due.late { color:#DC2626 }
-.del-btn { opacity:0; border:none; background:none; cursor:pointer; font-size:14px; color:var(--muted); padding:4px 6px; border-radius:6px; transition:all .15s; flex-shrink:0 }
+.del-btn { opacity:0; border:none; background:none; cursor:pointer; color:var(--muted); padding:4px 6px; border-radius:6px; transition:all .15s; flex-shrink:0; display:flex; align-items:center }
 .task-item:hover .del-btn { opacity:1 }
 .del-btn:hover { background:#FEE2E2; color:#DC2626 }
 </style>

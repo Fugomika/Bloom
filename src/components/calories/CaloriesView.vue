@@ -43,7 +43,7 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
 
 <template>
   <div>
-    <div class="sec-head"><h1>🥗 Calorie Tracker</h1><p>Fuel your body right</p></div>
+    <div class="sec-head"><h1>Calorie Tracker</h1><p>Fuel your body right</p></div>
 
     <div class="card" style="margin-bottom:18px">
       <div class="cal-top">
@@ -66,7 +66,7 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
             <span class="ccip" :class="remain >= 0 ? 'ccip-remain' : 'ccip-over'">
               {{ remain >= 0 ? `${remain.toLocaleString()} left` : `${Math.abs(remain).toLocaleString()} over!` }}
             </span>
-            <span class="ccip ccip-goal" @click="editGoal">⚙️ Goal: {{ goal.toLocaleString() }} kcal</span>
+            <span class="ccip ccip-goal" @click="editGoal">Goal: {{ goal.toLocaleString() }} kcal</span>
           </div>
         </div>
       </div>
@@ -96,7 +96,7 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
     <div class="overlay" :class="{ open: showModal }" @click.self="closeModal"
       @keydown="e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveMeal() }">
       <div class="modal">
-        <div class="modal-head">Log Food 🥗</div>
+        <div class="modal-head">Log Food</div>
         <div class="form-row">
           <div class="fg" style="flex:2"><label>Food / Meal</label><input type="text" v-model="calName" placeholder="e.g. Chicken Rice, Banana…" @keydown.enter="saveMeal"/></div>
           <div class="fg"><label>Calories (kcal)</label><input type="number" v-model="calKcal" placeholder="350" min="0" max="9999"/></div>

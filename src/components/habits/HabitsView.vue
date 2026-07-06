@@ -30,7 +30,7 @@ const w = last7()
 
 <template>
   <div>
-    <div class="sec-head"><h1>🔥 My Habits</h1><p>Build streaks, build yourself</p></div>
+    <div class="sec-head"><h1>My Habits</h1><p>Build streaks, build yourself</p></div>
 
     <div class="card" style="margin-bottom:18px">
       <div class="widget-title" style="margin-bottom:12px">Add New Habit</div>
@@ -42,11 +42,11 @@ const w = last7()
         <div class="fg">
           <label>Color</label>
           <select v-model="hColor">
-            <option value="pink">🌻 Sunflower</option>
-            <option value="teal">🌿 Green</option>
-            <option value="orange">🧡 Coral</option>
-            <option value="lime">💚 Lime</option>
-            <option value="purple">💜 Purple</option>
+            <option value="pink">Sunflower</option>
+            <option value="teal">Green</option>
+            <option value="orange">Coral</option>
+            <option value="lime">Lime</option>
+            <option value="purple">Purple</option>
           </select>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { DB, addWorkout as storeAddWorkout, deleteWorkout } from '../../composab
 import { uid, today } from '../../utils/date.js'
 import { MONTHS } from '../../utils/constants.js'
 import { confetti } from '../../composables/useConfetti.js'
+import AppIcon from '../ui/AppIcon.vue'
 
 const showModal = ref(false)
 const wktName = ref('')
@@ -41,11 +42,11 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
 
 <template>
   <div>
-    <div class="sec-head"><h1>💪 Workout Log</h1><p>Track every rep, every mile</p></div>
+    <div class="sec-head"><h1>Workout Log</h1><p>Track every rep, every mile</p></div>
     <div class="wkt-top">
       <button class="btn btn-red" @click="openModal">＋ Log Workout</button>
       <span style="font-size:13px;font-weight:800;color:var(--muted)">
-        {{ todayCt ? `${todayCt} workout${todayCt > 1 ? 's' : ''} logged today 💪` : 'No workouts logged today' }}
+        {{ todayCt ? `${todayCt} workout${todayCt > 1 ? 's' : ''} logged today` : 'No workouts logged today' }}
       </span>
     </div>
 
@@ -57,12 +58,12 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
         <div class="section-lbl">Today</div>
         <div v-for="w in recentWkt" :key="w.id" class="wkt-card">
           <div class="wkt-head">
-            <div class="wkt-icon">💪</div>
+            <div class="wkt-icon"><AppIcon name="activity" :size="18" /></div>
             <div>
               <div class="wkt-name">{{ w.name }}</div>
               <div class="wkt-meta">{{ wktDate(w) }} · {{ w.exercises.length }} exercise{{ w.exercises.length !== 1 ? 's' : '' }}</div>
             </div>
-            <div class="wkt-actions"><button class="wkt-del" @click="delWorkout(w.id)">🗑️</button></div>
+            <div class="wkt-actions"><button class="wkt-del" @click="delWorkout(w.id)"><AppIcon name="trash" :size="14" /></button></div>
           </div>
           <div class="ex-list">
             <div v-for="ex in w.exercises" :key="ex.id" class="ex-item">
@@ -77,12 +78,12 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
         <div class="section-lbl" :style="recentWkt.length ? 'margin-top:18px' : ''">Previous</div>
         <div v-for="w in otherWkt" :key="w.id" class="wkt-card">
           <div class="wkt-head">
-            <div class="wkt-icon">💪</div>
+            <div class="wkt-icon"><AppIcon name="activity" :size="18" /></div>
             <div>
               <div class="wkt-name">{{ w.name }}</div>
               <div class="wkt-meta">{{ wktDate(w) }} · {{ w.exercises.length }} exercise{{ w.exercises.length !== 1 ? 's' : '' }}</div>
             </div>
-            <div class="wkt-actions"><button class="wkt-del" @click="delWorkout(w.id)">🗑️</button></div>
+            <div class="wkt-actions"><button class="wkt-del" @click="delWorkout(w.id)"><AppIcon name="trash" :size="14" /></button></div>
           </div>
           <div class="ex-list">
             <div v-for="ex in w.exercises" :key="ex.id" class="ex-item">
@@ -99,7 +100,7 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
     <div class="overlay" :class="{ open: showModal }" @click.self="closeModal"
       @keydown="e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveWorkout() }">
       <div class="modal" style="max-width:580px">
-        <div class="modal-head">Log Workout 💪</div>
+        <div class="modal-head">Log Workout</div>
         <div class="fg" style="margin-bottom:14px">
           <label>Workout Name</label>
           <input type="text" v-model="wktName" placeholder="e.g. Morning Run, Full Body Strength, Yoga…"/>
@@ -132,11 +133,11 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
 .wkt-card { background:var(--surface); border-radius:var(--r); padding:18px; box-shadow:var(--sh); margin-bottom:11px; border:2px solid var(--border); animation:fadeUp .22s ease; transition:all .18s }
 .wkt-card:hover { border-color:rgba(239,68,68,.2); transform:translateX(3px) }
 .wkt-head { display:flex; align-items:center; gap:11px; margin-bottom:12px }
-.wkt-icon { width:40px; height:40px; border-radius:11px; background:linear-gradient(135deg,#EF4444,#DC2626); display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0 }
+.wkt-icon { width:40px; height:40px; border-radius:11px; background:linear-gradient(135deg,#EF4444,#DC2626); display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0 }
 .wkt-name { font-family:'Fredoka One',cursive; font-size:16px }
 .wkt-meta { font-size:11px; font-weight:800; color:var(--muted) }
 .wkt-actions { margin-left:auto }
-.wkt-del { border:none; background:none; cursor:pointer; font-size:13px; color:#D1D5DB; padding:5px; border-radius:6px; transition:all .15s }
+.wkt-del { border:none; background:none; cursor:pointer; color:#D1D5DB; padding:5px; border-radius:6px; transition:all .15s; display:flex; align-items:center }
 .wkt-del:hover { background:#FEE2E2; color:#DC2626 }
 .ex-list { display:flex; flex-direction:column; gap:4px }
 .ex-item { display:flex; align-items:center; gap:9px; font-size:13px; font-weight:700; padding:6px 10px; background:var(--bg); border-radius:var(--r-xs) }

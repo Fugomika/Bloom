@@ -9,7 +9,7 @@ const editId = ref(null)
 const nTitle = ref('')
 const nContent = ref('')
 const selColor = ref(NOTE_COLORS[0])
-const modalHead = ref('New Note 📝')
+const modalHead = ref('New Note')
 
 const sorted = computed(() => [...DB.notes].sort((a, b) => b.at - a.at))
 
@@ -17,10 +17,10 @@ function openModal(id = null) {
   editId.value = id
   if (id) {
     const n = DB.notes.find(x => x.id === id)
-    modalHead.value = 'Edit Note ✏️'
+    modalHead.value = 'Edit Note'
     nTitle.value = n.title; nContent.value = n.body; selColor.value = n.color
   } else {
-    modalHead.value = 'New Note 📝'
+    modalHead.value = 'New Note'
     nTitle.value = ''; nContent.value = ''; selColor.value = NOTE_COLORS[0]
   }
   showModal.value = true
@@ -43,7 +43,7 @@ function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]}
 
 <template>
   <div>
-    <div class="sec-head"><h1>📝 My Notes</h1><p>Capture every thought</p></div>
+    <div class="sec-head"><h1>My Notes</h1><p>Capture every thought</p></div>
     <div style="margin-bottom:18px"><button class="btn btn-sun" @click="openModal()">＋ New Note</button></div>
 
     <div class="notes-grid">
@@ -69,10 +69,10 @@ function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]}
         <div class="csrow" style="display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap">
           <div v-for="c in NOTE_COLORS" :key="c" class="cs" :class="{ on: selColor === c }" :style="`background:${c}`" @click="selColor = c"></div>
         </div>
-        <div class="fg"><label>Content</label><textarea v-model="nContent" placeholder="Write your thoughts… 💭"></textarea></div>
+        <div class="fg"><label>Content</label><textarea v-model="nContent" placeholder="Write your thoughts…"></textarea></div>
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="closeModal">Cancel</button>
-          <button class="btn btn-sun" @click="saveNote">Save ✨</button>
+          <button class="btn btn-sun" @click="saveNote">Save</button>
         </div>
       </div>
     </div>
