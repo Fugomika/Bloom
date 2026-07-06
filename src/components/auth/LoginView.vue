@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
-import { signIn, signUp } from '../../composables/useAuth.js'
+import { signIn, signUp, signInWithGoogle } from '../../composables/useAuth.js'
+import AppIcon from '../ui/AppIcon.vue'
+import BloomLogo from '../ui/BloomLogo.vue'
 
 const isSignUp = ref(false)
 const email    = ref('')
@@ -22,38 +24,44 @@ async function submit() {
   try {
     if (isSignUp.value) {
       await signUp(email.value, password.value)
-      successMsg.value = 'Account created! Check your email to confirm, then sign in 💌'
+      successMsg.value = 'Account created! Check your email to confirm, then sign in.'
       isSignUp.value = false
     } else {
       await signIn(email.value, password.value)
     }
   } catch (e) {
-    errorMsg.value = e.message || 'Something went wrong, try again 🥲'
+    errorMsg.value = e.message || 'Something went wrong — try again.'
   } finally {
     submitting.value = false
+  }
+}
+
+async function google() {
+  errorMsg.value = ''
+  try {
+    await signInWithGoogle()
+  } catch (e) {
+    errorMsg.value = e.message || 'Google sign-in failed — try again.'
   }
 }
 </script>
 
 <template>
   <div class="login-bg">
-    <span class="deco d1">🌸</span>
-    <span class="deco d2">✨</span>
-    <span class="deco d3">🌼</span>
-    <span class="deco d4">💛</span>
-    <span class="deco d5">🌻</span>
-    <span class="deco d6">🍀</span>
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
 
     <div class="login-card">
       <div class="brand">
-        <div class="brand-logo">🌻</div>
+        <div class="brand-logo"><BloomLogo :size="60" /></div>
         <h1 class="brand-name">Bloom</h1>
-        <p class="brand-sub">{{ isSignUp ? 'create your little space 🌱' : 'welcome back, sunshine 💛' }}</p>
+        <p class="brand-sub">{{ isSignUp ? 'make a little space of your own' : 'welcome back, sunshine' }}</p>
       </div>
 
       <form @submit.prevent="submit" class="login-form">
         <div class="field">
-          <span class="field-ico">✉️</span>
+          <span class="field-ico"><AppIcon name="mail" :size="15" /></span>
           <input
             type="email"
             v-model="email"
@@ -63,7 +71,7 @@ async function submit() {
           />
         </div>
         <div class="field">
-          <span class="field-ico">🔒</span>
+          <span class="field-ico"><AppIcon name="lock" :size="15" /></span>
           <input
             type="password"
             v-model="password"
@@ -78,10 +86,22 @@ async function submit() {
         <p v-if="successMsg" class="msg-success">{{ successMsg }}</p>
 
         <button type="submit" class="submit-btn" :disabled="submitting">
-          <span v-if="submitting" class="spin">🌻</span>
-          <span v-else>{{ isSignUp ? 'Create Account ✨' : 'Sign In 🌻' }}</span>
+          <span v-if="submitting" class="spin"></span>
+          <span v-else>{{ isSignUp ? 'Create account' : 'Sign in' }}</span>
         </button>
       </form>
+
+      <div class="divider"><span>or</span></div>
+
+      <button type="button" class="google-btn" @click="google">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        Continue with Google
+      </button>
 
       <div class="toggle-row">
         <span>{{ isSignUp ? 'Already have an account?' : "Don't have one yet?" }}</span>
@@ -107,25 +127,24 @@ async function submit() {
   box-sizing: border-box;
 }
 
-/* Floating decorations */
-.deco {
+/* Soft ambient blobs */
+.blob {
   position: absolute;
-  font-size: 28px;
+  border-radius: 50%;
+  filter: blur(60px);
   pointer-events: none;
-  opacity: 0.55;
-  animation: float 6s ease-in-out infinite;
-  user-select: none;
+  animation: drift 9s ease-in-out infinite;
 }
-.d1 { top: 8%;  left: 8%;  animation-delay: 0s;    animation-duration: 7s }
-.d2 { top: 14%; right: 11%;animation-delay: 1s;    animation-duration: 5s; font-size: 20px }
-.d3 { bottom: 18%; left: 14%; animation-delay: 2s;  animation-duration: 8s; font-size: 24px }
-.d4 { top: 55%; right: 7%; animation-delay: 0.5s;  animation-duration: 6s; font-size: 22px }
-.d5 { bottom: 8%; right: 18%; animation-delay: 3s;  animation-duration: 7s }
-.d6 { top: 38%; left: 5%;  animation-delay: 1.5s;  animation-duration: 9s; font-size: 18px }
+.b1 { width: 340px; height: 340px; top: -80px; left: -100px; background: rgba(251, 191, 36, .35) }
+.b2 { width: 280px; height: 280px; bottom: -60px; right: -70px; background: rgba(249, 115, 22, .22); animation-delay: 2s }
+.b3 { width: 220px; height: 220px; top: 55%; left: 6%; background: rgba(132, 204, 22, .18); animation-delay: 4s }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0) rotate(0deg) }
-  50%       { transform: translateY(-18px) rotate(8deg) }
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) }
+  50%      { transform: translate(18px, -22px) }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blob, .brand-logo, .login-card { animation: none }
 }
 
 /* Card */
@@ -148,9 +167,9 @@ async function submit() {
 /* Brand */
 .brand { text-align: center; margin-bottom: 28px }
 .brand-logo {
-  font-size: 56px;
-  display: block;
-  margin-bottom: 6px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
   animation: logoFloat 3s ease-in-out infinite;
 }
 @keyframes logoFloat {
@@ -173,7 +192,7 @@ async function submit() {
 }
 
 /* Form */
-.login-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px }
+.login-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px }
 
 .field {
   display: flex;
@@ -189,7 +208,7 @@ async function submit() {
   border-color: #FBBF24;
   box-shadow: 0 0 0 3px rgba(251,191,36,.18);
 }
-.field-ico { font-size: 16px; flex-shrink: 0 }
+.field-ico { display: flex; color: #D97706; flex-shrink: 0 }
 .field input {
   flex: 1;
   border: none;
@@ -238,6 +257,10 @@ async function submit() {
   transition: transform .18s, box-shadow .18s, opacity .18s;
   box-shadow: 0 4px 14px rgba(251,191,36,.45);
   margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 51px;
 }
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
@@ -246,8 +269,60 @@ async function submit() {
 .submit-btn:active:not(:disabled) { transform: translateY(0) }
 .submit-btn:disabled { opacity: .65; cursor: default }
 
-.spin { display: inline-block; animation: spinSun 1s linear infinite }
-@keyframes spinSun { to { transform: rotate(360deg) } }
+.spin {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid rgba(26,14,0,.25);
+  border-top-color: #1A0E00;
+  animation: spinRing .7s linear infinite;
+}
+@keyframes spinRing { to { transform: rotate(360deg) } }
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: #A16207;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  opacity: .6;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1.5px;
+  background: #FDE68A;
+}
+
+/* Google */
+.google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid #FDE68A;
+  background: #fff;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1A0E00;
+  transition: border-color .18s, box-shadow .18s, transform .18s;
+  margin-bottom: 20px;
+}
+.google-btn:hover {
+  border-color: #FBBF24;
+  box-shadow: 0 4px 14px rgba(251,191,36,.2);
+  transform: translateY(-1px);
+}
 
 /* Toggle */
 .toggle-row {
@@ -277,7 +352,6 @@ async function submit() {
 
 @media (max-width: 440px) {
   .login-card { padding: 32px 22px 26px; border-radius: 22px }
-  .brand-logo { font-size: 48px }
   .brand-name { font-size: 32px }
 }
 </style>
