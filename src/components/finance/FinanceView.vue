@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { DB, addTransaction, updateTransaction, deleteTransaction, saveSettings } from '../../composables/useStore.js'
 import { uid, today, thisYM, fmtDate, fmtIDR } from '../../utils/date.js'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../../utils/constants.js'
+import AppIcon from '../ui/AppIcon.vue'
 
 const ALL_CATS = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES]
 function catInfo(key) {
@@ -149,24 +150,24 @@ const EMPTY_MSG = {
 <template>
   <div>
     <div class="sec-head">
-      <h1>💰 Finance</h1>
+      <h1>Finance</h1>
       <p>Lacak pemasukan, pengeluaran, dan budget bulanan kamu</p>
     </div>
 
     <!-- Stats -->
     <div class="fin-stats">
       <div class="fin-stat" :class="balance >= 0 ? 'fs-pos' : 'fs-neg'">
-        <span class="fs-ee">🏦</span>
+        <span class="fs-ee"><AppIcon name="wallet" :size="22" /></span>
         <span class="fs-n">{{ fmtIDR(balance) }}</span>
         <div class="fs-l">saldo total</div>
       </div>
       <div class="fin-stat fs-income">
-        <span class="fs-ee">💵</span>
+        <span class="fs-ee"><AppIcon name="trend-up" :size="22" /></span>
         <span class="fs-n">{{ fmtIDR(incomeMonth) }}</span>
         <div class="fs-l">pemasukan bulan ini</div>
       </div>
       <div class="fin-stat fs-expense">
-        <span class="fs-ee">🧾</span>
+        <span class="fs-ee"><AppIcon name="trend-down" :size="22" /></span>
         <span class="fs-n">{{ fmtIDR(expenseMonth) }}</span>
         <div class="fs-l">pengeluaran bulan ini</div>
       </div>
@@ -175,7 +176,7 @@ const EMPTY_MSG = {
     <div class="fin-top-row">
       <button class="btn btn-leaf" @click="openAdd('income')">＋ Pemasukan</button>
       <button class="btn btn-red"  @click="openAdd('expense')">＋ Pengeluaran</button>
-      <button class="btn btn-ghost fin-budget-btn" @click="openBudgetModal">🎯 Atur Budget</button>
+      <button class="btn btn-ghost fin-budget-btn" @click="openBudgetModal"><AppIcon name="target" :size="14" /> Atur Budget</button>
     </div>
 
     <div class="fin-grid">
@@ -183,8 +184,8 @@ const EMPTY_MSG = {
       <div class="fin-col-main">
         <div class="ftabs">
           <button class="ftab" :class="{ active: tFilter === 'all' }"     @click="tFilter = 'all'">Semua</button>
-          <button class="ftab" :class="{ active: tFilter === 'income' }"  @click="tFilter = 'income'">💵 Pemasukan</button>
-          <button class="ftab" :class="{ active: tFilter === 'expense' }" @click="tFilter = 'expense'">🧾 Pengeluaran</button>
+          <button class="ftab" :class="{ active: tFilter === 'income' }"  @click="tFilter = 'income'">Pemasukan</button>
+          <button class="ftab" :class="{ active: tFilter === 'expense' }" @click="tFilter = 'expense'">Pengeluaran</button>
         </div>
 
         <div v-if="!filtered.length" class="empty">
@@ -229,7 +230,7 @@ const EMPTY_MSG = {
       <!-- Right: breakdown + budgets -->
       <div class="fin-col-side">
         <div class="card">
-          <div class="widget-title">📊 Kategori Bulan Ini</div>
+          <div class="widget-title">Kategori Bulan Ini</div>
           <div v-if="categoryBreakdown.length" class="fin-cat-bars">
             <div v-for="c in categoryBreakdown" :key="c.key" class="fin-cat-bar-row">
               <div class="fin-cat-bar-lbl">
@@ -241,11 +242,11 @@ const EMPTY_MSG = {
               </div>
             </div>
           </div>
-          <div v-else class="fin-empty-mini">Belum ada pengeluaran bulan ini 🌱</div>
+          <div v-else class="fin-empty-mini">Belum ada pengeluaran bulan ini</div>
         </div>
 
         <div v-if="budgetProgress.length" class="card" style="margin-top:14px">
-          <div class="widget-title">🎯 Budget Bulanan</div>
+          <div class="widget-title">Budget Bulanan</div>
           <div class="fin-budget-list">
             <div v-for="b in budgetProgress" :key="b.key" class="fin-budget-row">
               <div class="fin-cat-bar-lbl">
@@ -265,11 +266,11 @@ const EMPTY_MSG = {
     <div class="overlay" :class="{ open: showModal }" @click.self="closeModal"
       @keydown="e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') save() }">
       <div class="modal">
-        <div class="modal-head">{{ editId ? '✏️ Edit Transaksi' : (fType === 'income' ? '💵 Tambah Pemasukan' : '🧾 Tambah Pengeluaran') }}</div>
+        <div class="modal-head">{{ editId ? 'Edit Transaksi' : (fType === 'income' ? 'Tambah Pemasukan' : 'Tambah Pengeluaran') }}</div>
 
         <div class="fin-seg-row">
-          <button class="fin-seg fin-seg-income" :class="{ on: fType === 'income' }" @click="switchType('income')">💵 Pemasukan</button>
-          <button class="fin-seg fin-seg-expense" :class="{ on: fType === 'expense' }" @click="switchType('expense')">🧾 Pengeluaran</button>
+          <button class="fin-seg fin-seg-income" :class="{ on: fType === 'income' }" @click="switchType('income')">Pemasukan</button>
+          <button class="fin-seg fin-seg-expense" :class="{ on: fType === 'expense' }" @click="switchType('expense')">Pengeluaran</button>
         </div>
 
         <div class="form-row">
@@ -303,7 +304,7 @@ const EMPTY_MSG = {
 
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="closeModal">Batal</button>
-          <button class="btn" :class="fType === 'income' ? 'btn-leaf' : 'btn-red'" @click="save">Simpan ✨</button>
+          <button class="btn" :class="fType === 'income' ? 'btn-leaf' : 'btn-red'" @click="save">Simpan</button>
         </div>
       </div>
     </div>
@@ -311,7 +312,7 @@ const EMPTY_MSG = {
     <!-- Budget Modal -->
     <div class="overlay" :class="{ open: showBudgetModal }" @click.self="showBudgetModal = false">
       <div class="modal">
-        <div class="modal-head">🎯 Atur Budget Bulanan</div>
+        <div class="modal-head">Atur Budget Bulanan</div>
         <p class="fin-budget-sub">Set limit per kategori — kosongkan untuk mematikan budget kategori itu.</p>
 
         <div class="fin-budget-form">
@@ -323,7 +324,7 @@ const EMPTY_MSG = {
 
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="showBudgetModal = false">Batal</button>
-          <button class="btn btn-sun" @click="saveBudgets">Simpan ✨</button>
+          <button class="btn btn-sun" @click="saveBudgets">Simpan</button>
         </div>
       </div>
     </div>
@@ -338,7 +339,7 @@ const EMPTY_MSG = {
 .fin-stat.fs-pos, .fin-stat.fs-income { background:linear-gradient(135deg,#22C55E,#15803D) }
 .fin-stat.fs-neg { background:linear-gradient(135deg,#EF4444,#DC2626) }
 .fin-stat.fs-expense { background:linear-gradient(135deg,#F97316,#DC2626) }
-.fs-ee { font-size:24px; display:block; margin-bottom:4px }
+.fs-ee { display:flex; margin-bottom:7px }
 .fs-n  { font-family:'Fredoka One',cursive; font-size:22px; line-height:1; display:block; word-break:break-word }
 .fs-l  { font-size:10px; font-weight:900; letter-spacing:.05em; text-transform:uppercase; opacity:.85; margin-top:4px }
 

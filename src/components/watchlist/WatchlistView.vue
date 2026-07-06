@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { DB, addWatchItem, updateWatchItem, deleteWatchItem, reorderWatchQueue } from '../../composables/useStore.js'
 import { uid } from '../../utils/date.js'
+import AppIcon from '../ui/AppIcon.vue'
 
 const PRIORITY_CFG = {
   must:  { icon: '🔥', label: 'Wajib nonton', color: '#EF4444', bg: 'rgba(239,68,68,.12)' },
@@ -68,7 +69,7 @@ function save() {
 }
 
 const NEXT_STATUS = { queued: 'watching', watching: 'done', done: 'queued' }
-const NEXT_ICON   = { queued: '▶️', watching: '✅', done: '🔄' }
+const NEXT_ICON   = { queued: 'play', watching: 'check', done: 'rotate' }
 const NEXT_TITLE  = { queued: 'Mulai nonton', watching: 'Tandai selesai', done: 'Masukin queue lagi' }
 
 function cycleStatus(item) {
@@ -101,8 +102,8 @@ const STATUS_CFG = {
 
 const EMPTY_MSG = {
   all:      { ee: '🍿', h: 'Watchlist masih kosong',    p: 'Tambahin film atau serial yang mau ditonton yuk!' },
-  watching: { ee: '📺', h: 'Belum ada yang lagi ditonton', p: 'Mulai tonton salah satu dari queue kamu ✨' },
-  queue:    { ee: '📋', h: 'Queue kosong nih',           p: 'Tambahin tontonan baru biar ada daftarnya 🌻' },
+  watching: { ee: '📺', h: 'Belum ada yang lagi ditonton', p: 'Mulai tonton salah satu dari queue kamu!' },
+  queue:    { ee: '📋', h: 'Queue kosong nih',           p: 'Tambahin tontonan baru biar ada daftarnya' },
   done:     { ee: '🎉', h: 'Belum ada yang selesai',     p: 'Nonton dulu, nanti muncul di sini!' },
 }
 
@@ -159,14 +160,14 @@ function startWatching() {
 <template>
   <div>
     <div class="sec-head">
-      <h1>🎬 Watchlist</h1>
+      <h1>Watchlist</h1>
       <p>Lacak tontonan kamu — yang lagi jalan, antrian, dan yang sudah tamat</p>
     </div>
 
     <div class="wl-top-row">
       <button class="btn btn-sun" @click="openAdd">＋ Tambah</button>
       <button class="wl-pick-btn" @click="openPicker" :disabled="!queued.length">
-        🎲 Pilih Sekarang!
+        <AppIcon name="dice" :size="14" /> Pilih Sekarang!
       </button>
     </div>
 
@@ -177,14 +178,14 @@ function startWatching() {
         <span class="wl-banner-title">Bingung mau nonton yang mana?</span>
         <span class="wl-banner-sub">{{ queued.length }} tontonan nunggu giliran — biar kita yang pilihkan!</span>
       </div>
-      <button class="wl-banner-btn" @click="openPicker">🎲 Pilih!</button>
+      <button class="wl-banner-btn" @click="openPicker">Pilih!</button>
     </div>
 
     <div class="ftabs" style="margin-bottom:18px">
       <button class="ftab" :class="{ active: tFilter === 'all' }"      @click="tFilter = 'all'">Semua ({{ allItems.length }})</button>
-      <button class="ftab" :class="{ active: tFilter === 'watching' }" @click="tFilter = 'watching'">🍿 Nonton ({{ watching.length }})</button>
-      <button class="ftab" :class="{ active: tFilter === 'queue' }"    @click="tFilter = 'queue'">📋 Queue ({{ queued.length }})</button>
-      <button class="ftab" :class="{ active: tFilter === 'done' }"     @click="tFilter = 'done'">✅ Selesai ({{ done.length }})</button>
+      <button class="ftab" :class="{ active: tFilter === 'watching' }" @click="tFilter = 'watching'">Nonton ({{ watching.length }})</button>
+      <button class="ftab" :class="{ active: tFilter === 'queue' }"    @click="tFilter = 'queue'">Queue ({{ queued.length }})</button>
+      <button class="ftab" :class="{ active: tFilter === 'done' }"     @click="tFilter = 'done'">Selesai ({{ done.length }})</button>
     </div>
 
     <div class="wl-list">
@@ -223,7 +224,7 @@ function startWatching() {
               <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">▼</button>
             </div>
             <button class="wl-action" @click.stop="cycleStatus(item)" :title="NEXT_TITLE[item.status]">
-              {{ NEXT_ICON[item.status] }}
+              <AppIcon :name="NEXT_ICON[item.status]" :size="15" />
             </button>
             <button class="wl-del" @click.stop="confirmDelete(item.id)">✕</button>
           </template>
@@ -240,7 +241,7 @@ function startWatching() {
     <!-- Add / Edit Modal -->
     <div class="overlay" :class="{ open: showModal }" @click.self="closeModal">
       <div class="modal">
-        <div class="modal-head">{{ editId ? '✏️ Edit Tontonan' : '🎬 Tambah ke Watchlist' }}</div>
+        <div class="modal-head">{{ editId ? 'Edit Tontonan' : 'Tambah ke Watchlist' }}</div>
 
         <div class="fg" style="margin-bottom:16px">
           <label>Judul</label>
@@ -273,7 +274,7 @@ function startWatching() {
 
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="closeModal">Batal</button>
-          <button class="btn btn-sun"   @click="save">Simpan ✨</button>
+          <button class="btn btn-sun"   @click="save">Simpan</button>
         </div>
       </div>
     </div>
@@ -291,7 +292,7 @@ function startWatching() {
 
         <!-- Mood filter -->
         <div class="wlp-mood-row">
-          <button class="wlp-mood" :class="{ on: pickerMood === 'all' }"    @click="setMood('all')">🎲 Semua</button>
+          <button class="wlp-mood" :class="{ on: pickerMood === 'all' }"    @click="setMood('all')">Semua</button>
           <button class="wlp-mood" :class="{ on: pickerMood === 'movie' }"  @click="setMood('movie')">🎬 Movie</button>
           <button class="wlp-mood" :class="{ on: pickerMood === 'series' }" @click="setMood('series')">📺 Series</button>
         </div>
@@ -322,8 +323,8 @@ function startWatching() {
         <p class="wlp-note">Tontonan 🔥 Wajib lebih sering muncul di sini</p>
 
         <div class="modal-foot">
-          <button class="btn btn-ghost" @click="rerollPicker" :disabled="!pickerPool.length">🎲 Lain lagi</button>
-          <button v-if="pickerResult" class="btn btn-sun" @click="startWatching">▶️ Nonton sekarang!</button>
+          <button class="btn btn-ghost" @click="rerollPicker" :disabled="!pickerPool.length"><AppIcon name="dice" :size="13" /> Lain lagi</button>
+          <button v-if="pickerResult" class="btn btn-sun" @click="startWatching"><AppIcon name="play" :size="13" /> Nonton sekarang!</button>
         </div>
       </div>
     </div>
@@ -339,6 +340,7 @@ function startWatching() {
   border:2px solid var(--sun); background:rgba(251,191,36,.1);
   cursor:pointer; font-family:'Nunito',sans-serif; font-size:13px; font-weight:900;
   color:var(--sun-dk); transition:all .18s;
+  display:inline-flex; align-items:center; gap:6px;
 }
 .wl-pick-btn:hover:not(:disabled) { background:rgba(251,191,36,.2); box-shadow:0 0 0 3px rgba(251,191,36,.18) }
 .wl-pick-btn:disabled { opacity:.35; cursor:default }

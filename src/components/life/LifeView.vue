@@ -4,6 +4,7 @@ import { DB, upsertCalendar, deleteCalendar as storeDeleteCalendar, saveCalendar
 import { uid, fmtYM, fmtDateShort, eventDuration } from '../../utils/date.js'
 import { MONTHS, EVT_EMOJIS, EVT_COLORS } from '../../utils/constants.js'
 import EmojiPicker from '../ui/EmojiPicker.vue'
+import AppIcon from '../ui/AppIcon.vue'
 
 // ── State ──────────────────────────────────────────────────
 const activeCalId = ref(null)
@@ -251,7 +252,7 @@ const calYearRange = computed(() => {
 
 <template>
   <div>
-    <div class="sec-head"><h1>📅 Life in Months</h1><p>Create time grids for anything — your life, a trip, a career</p></div>
+    <div class="sec-head"><h1>Life in Months</h1><p>Create time grids for anything — your life, a trip, a career</p></div>
 
     <!-- CALENDAR LIST -->
     <div v-if="!activeCalId">
@@ -270,8 +271,8 @@ const calYearRange = computed(() => {
               <div class="cl-meta">{{ fmtDateShort(cal.startDate) }} · {{ cal.totalYears }}yr total</div>
             </div>
             <div class="cl-acts" @click.stop>
-              <button class="evt-act" @click="openCalModal(cal.id)">✏️</button>
-              <button class="evt-act del" @click="delCalendar(cal.id)">🗑️</button>
+              <button class="evt-act" @click="openCalModal(cal.id)"><AppIcon name="pencil" :size="13" /></button>
+              <button class="evt-act del" @click="delCalendar(cal.id)"><AppIcon name="trash" :size="13" /></button>
             </div>
           </div>
           <div class="life-progress-bar" style="margin:10px 0 5px"><div class="life-progress-fill" :style="`width:${calProgress(cal)}%`"></div></div>
@@ -288,7 +289,7 @@ const calYearRange = computed(() => {
       <div class="life-breadcrumb">
         <button class="btn btn-ghost" style="font-size:12px;padding:5px 12px" @click="backToList">← Back</button>
         <div style="font-family:'Fredoka One',cursive;font-size:20px;flex:1">{{ activeCal.emoji }} {{ activeCal.name }}</div>
-        <button class="btn btn-ghost" style="font-size:12px;padding:5px 12px" @click="openCalModal(activeCalId)">✏️ Edit</button>
+        <button class="btn btn-ghost" style="font-size:12px;padding:5px 12px" @click="openCalModal(activeCalId)"><AppIcon name="pencil" :size="12" /> Edit</button>
       </div>
 
       <div v-if="gridStats" class="life-stat-row">
@@ -324,7 +325,7 @@ const calYearRange = computed(() => {
         <!-- Events card -->
         <div class="card life-events-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-            <div class="widget-title" style="margin-bottom:0">🎯 Events</div>
+            <div class="widget-title" style="margin-bottom:0">Events</div>
             <button class="btn btn-sun" style="padding:6px 13px;font-size:12px" @click="openEvtModal()">＋ Add</button>
           </div>
 
@@ -351,7 +352,7 @@ const calYearRange = computed(() => {
                   <div style="font-weight:800;font-size:13px">{{ ev.title }}</div>
                   <div style="font-size:11px;color:var(--muted);font-weight:700">{{ fmtYM(ev.start) }} → {{ ev.end ? fmtYM(ev.end) : 'Present' }} · {{ eventDuration(ev) }}</div>
                 </div>
-                <span style="font-size:12px;color:var(--muted)">✏️</span>
+                <span style="display:flex;color:var(--muted)"><AppIcon name="pencil" :size="12" /></span>
               </div>
               <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px;margin-top:8px;width:100%" @click="openEvtModal(null, selectedYM)">＋ Add another here</button>
             </div>
@@ -372,8 +373,8 @@ const calYearRange = computed(() => {
                 </div>
               </div>
               <div class="evt-acts">
-                <button class="evt-act" @click="openEvtModal(ev.id)">✏️</button>
-                <button class="evt-act del" @click="delEvent(ev.id)">🗑️</button>
+                <button class="evt-act" @click="openEvtModal(ev.id)"><AppIcon name="pencil" :size="13" /></button>
+                <button class="evt-act del" @click="delEvent(ev.id)"><AppIcon name="trash" :size="13" /></button>
               </div>
             </div>
             <div v-if="totalPages > 1" class="evt-pg">
@@ -389,7 +390,7 @@ const calYearRange = computed(() => {
     <!-- CALENDAR MODAL -->
     <div class="overlay" :class="{ open: showCalModal }" @click.self="closeCalModal">
       <div class="modal" style="max-width:500px">
-        <div class="modal-head">{{ editCalId ? 'Edit Calendar ✏️' : 'New Calendar 📅' }}</div>
+        <div class="modal-head">{{ editCalId ? 'Edit Calendar' : 'New Calendar' }}</div>
         <div class="form-row" style="margin-bottom:10px;align-items:flex-start">
           <div class="fg" style="flex:2"><label>Calendar Name</label><input type="text" v-model="cnName" placeholder="e.g. My Life, World Trip, Workplace…"/></div>
           <div class="fg" style="max-width:80px">
@@ -412,7 +413,7 @@ const calYearRange = computed(() => {
         </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="closeCalModal">Cancel</button>
-          <button v-if="editCalId" class="btn btn-ghost" style="color:#DC2626" @click="delCalendar(editCalId); closeCalModal()">🗑️ Delete</button>
+          <button v-if="editCalId" class="btn btn-ghost" style="color:#DC2626" @click="delCalendar(editCalId); closeCalModal()"><AppIcon name="trash" :size="13" /> Delete</button>
           <button class="btn btn-sun" @click="saveCalendar">Save</button>
         </div>
       </div>
@@ -421,7 +422,7 @@ const calYearRange = computed(() => {
     <!-- EVENT MODAL -->
     <div class="overlay" :class="{ open: showEvtModal }" @click.self="closeEvtModal">
       <div class="modal" style="max-width:560px">
-        <div class="modal-head">{{ editEvtId ? 'Edit Event ✏️' : 'Add Event 🎯' }}</div>
+        <div class="modal-head">{{ editEvtId ? 'Edit Event' : 'Add Event' }}</div>
         <div class="form-row" style="margin-bottom:10px;align-items:flex-start">
           <div class="fg" style="flex:2"><label>Title</label><input type="text" v-model="evtTitle" placeholder="e.g. Relationship with Sarah, CS Degree…" @keydown.enter="saveEvent"/></div>
           <div class="fg" style="max-width:80px">
@@ -467,7 +468,7 @@ const calYearRange = computed(() => {
         </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="closeEvtModal">Cancel</button>
-          <button v-if="editEvtId" class="btn btn-ghost" style="color:#DC2626" @click="delEvtFromModal">🗑️ Delete</button>
+          <button v-if="editEvtId" class="btn btn-ghost" style="color:#DC2626" @click="delEvtFromModal"><AppIcon name="trash" :size="13" /> Delete</button>
           <button class="btn btn-sun" @click="saveEvent">Save Event</button>
         </div>
       </div>
@@ -485,7 +486,7 @@ const calYearRange = computed(() => {
 .cl-name { font-family:'Fredoka One',cursive; font-size:17px }
 .cl-meta { font-size:11px; font-weight:800; color:var(--muted); margin-top:2px }
 .cl-acts { margin-left:auto; display:flex; gap:3px; flex-shrink:0 }
-.evt-act { border:none; background:none; cursor:pointer; font-size:13px; padding:4px 6px; border-radius:6px; color:var(--muted); transition:all .15s }
+.evt-act { border:none; background:none; cursor:pointer; padding:4px 6px; border-radius:6px; color:var(--muted); transition:all .15s; display:flex; align-items:center }
 .evt-act:hover { background:rgba(0,0,0,.08); color:var(--text) }
 .evt-act.del:hover { background:#FEE2E2; color:#DC2626 }
 

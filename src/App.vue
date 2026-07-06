@@ -4,6 +4,7 @@ import { user, initAuth, signOut } from './composables/useAuth.js'
 import { load, loading, reset } from './composables/useStore.js'
 import { activeSection, go } from './composables/useNavigation.js'
 import LoginView    from './components/auth/LoginView.vue'
+import BloomLogo    from './components/ui/BloomLogo.vue'
 import AppSidebar   from './components/layout/AppSidebar.vue'
 import AppBottomNav from './components/layout/AppBottomNav.vue'
 import DashboardView from './components/dashboard/DashboardView.vue'
@@ -49,7 +50,7 @@ async function handleSignOut() {
   <!-- Signed in, loading data -->
   <div v-else-if="loading" class="app-loading">
     <div class="app-loading-inner">
-      <div class="app-loading-logo">🌻</div>
+      <div class="app-loading-logo"><BloomLogo :size="56" /></div>
       <div class="app-loading-text">Loading Bloom…</div>
     </div>
   </div>
@@ -84,9 +85,9 @@ async function handleSignOut() {
 }
 .app-loading-inner { text-align: center }
 .app-loading-logo {
-  font-size: 56px;
   animation: ldotPulse 1.6s ease-in-out infinite;
-  display: block;
+  display: flex;
+  justify-content: center;
   margin-bottom: 16px;
 }
 .app-loading-text {
