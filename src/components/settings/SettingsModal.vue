@@ -2,19 +2,20 @@
 import { computed } from 'vue'
 import { DB, ALL_SECTIONS, saveSettings } from '../../composables/useStore.js'
 import { activeSection, go } from '../../composables/useNavigation.js'
+import AppIcon from '../ui/AppIcon.vue'
 
 defineProps({ open: Boolean })
 const emit = defineEmits(['close'])
 
 const SECTION_META = {
-  tasks:     { icon: '✅', label: 'Tasks',     grad: 'linear-gradient(135deg,#10B981,#059669)' },
-  habits:    { icon: '🔥', label: 'Habits',    grad: 'linear-gradient(135deg,#F97316,#EA580C)' },
-  calories:  { icon: '🥗', label: 'Calories',  grad: 'linear-gradient(135deg,#84CC16,#22C55E)' },
-  workout:   { icon: '💪', label: 'Workout',   grad: 'linear-gradient(135deg,#EF4444,#DC2626)' },
-  notes:     { icon: '📝', label: 'Notes',     grad: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
-  life:      { icon: '📅', label: 'Life',      grad: 'linear-gradient(135deg,#34D399,#818CF8)' },
-  watchlist: { icon: '🎬', label: 'Watchlist', grad: 'linear-gradient(135deg,#EC4899,#DB2777)' },
-  finance:   { icon: '💰', label: 'Finance',   grad: 'linear-gradient(135deg,#22C55E,#15803D)' },
+  tasks:     { icon: 'tasks',        label: 'Tasks',     grad: 'linear-gradient(135deg,#10B981,#059669)' },
+  habits:    { icon: 'flame',        label: 'Habits',    grad: 'linear-gradient(135deg,#F97316,#EA580C)' },
+  calories:  { icon: 'apple',        label: 'Calories',  grad: 'linear-gradient(135deg,#84CC16,#22C55E)' },
+  workout:   { icon: 'activity',     label: 'Workout',   grad: 'linear-gradient(135deg,#EF4444,#DC2626)' },
+  notes:     { icon: 'note',         label: 'Notes',     grad: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
+  life:      { icon: 'calendar',     label: 'Life',      grad: 'linear-gradient(135deg,#34D399,#818CF8)' },
+  watchlist: { icon: 'clapperboard', label: 'Watchlist', grad: 'linear-gradient(135deg,#EC4899,#DB2777)' },
+  finance:   { icon: 'wallet',       label: 'Finance',   grad: 'linear-gradient(135deg,#22C55E,#15803D)' },
 }
 
 const sections = computed(() => ALL_SECTIONS.map(s => ({
@@ -35,11 +36,11 @@ function toggle(key) {
 <template>
   <div class="overlay" :class="{ open }" @click.self="emit('close')">
     <div class="modal smodal">
-      <div class="modal-head">⚙️ Customize Bloom</div>
-      <p class="smodal-sub">Show only the sections you actually use 🌻</p>
+      <div class="modal-head">Customize Bloom</div>
+      <p class="smodal-sub">Show only the sections you actually use</p>
 
       <div class="always-on">
-        <span class="ao-icon">🏠</span>
+        <span class="ao-icon"><AppIcon name="home" :size="16" /></span>
         <span class="ao-lbl">Dashboard — always visible</span>
       </div>
 
@@ -51,8 +52,8 @@ function toggle(key) {
           :style="s.on ? `--grad:${s.grad}` : ''"
           @click="toggle(s.key)"
         >
-          <div class="stog-icon-wrap" :style="s.on ? `background:${s.grad}` : ''">
-            <span class="stog-icon">{{ s.icon }}</span>
+          <div class="stog-icon-wrap" :class="{ on: s.on }" :style="s.on ? `background:${s.grad}` : ''">
+            <span class="stog-icon"><AppIcon :name="s.icon" :size="15" /></span>
           </div>
           <span class="stog-label">{{ s.label }}</span>
           <span class="stog-check">{{ s.on ? '✓' : '' }}</span>
@@ -62,7 +63,7 @@ function toggle(key) {
       <p class="smodal-hint">Tap a section to toggle it. Changes save instantly.</p>
 
       <div class="modal-foot">
-        <button class="btn btn-sun" @click="emit('close')">Done ✨</button>
+        <button class="btn btn-sun" @click="emit('close')">Done</button>
       </div>
     </div>
   </div>
@@ -88,7 +89,7 @@ function toggle(key) {
   margin-bottom: 16px;
   border: 2px dashed var(--border);
 }
-.ao-icon { font-size: 18px }
+.ao-icon { display: flex; color: var(--muted) }
 .ao-lbl  { font-size: 12px; font-weight: 800; color: var(--muted) }
 
 .stoggle-grid {
@@ -141,7 +142,8 @@ function toggle(key) {
   position: relative;
   z-index: 1;
 }
-.stog-icon { font-size: 16px }
+.stog-icon { display: flex; color: var(--muted) }
+.stog-icon-wrap.on .stog-icon { color: #fff }
 
 .stog-label {
   flex: 1;

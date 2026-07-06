@@ -3,6 +3,8 @@ import { computed, ref } from 'vue'
 import { MONTHS } from '../../utils/constants.js'
 import { DB } from '../../composables/useStore.js'
 import SettingsModal from '../settings/SettingsModal.vue'
+import AppIcon from '../ui/AppIcon.vue'
+import BloomLogo from '../ui/BloomLogo.vue'
 
 defineProps({ active: String })
 const emit = defineEmits(['navigate', 'signout'])
@@ -14,15 +16,15 @@ const monthYear = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`
 const showSettings = ref(false)
 
 const ALL_NAV = [
-  { s: 'dashboard', icon: '🏠', label: 'Dashboard' },
-  { s: 'tasks',     icon: '✅', label: 'Tasks' },
-  { s: 'habits',    icon: '🔥', label: 'Habits' },
-  { s: 'calories',  icon: '🥗', label: 'Calories' },
-  { s: 'workout',   icon: '💪', label: 'Workout' },
-  { s: 'notes',     icon: '📝', label: 'Notes' },
-  { s: 'life',      icon: '📅', label: 'Life' },
-  { s: 'watchlist', icon: '🎬', label: 'Watchlist' },
-  { s: 'finance',   icon: '💰', label: 'Finance' },
+  { s: 'dashboard', icon: 'home',         label: 'Dashboard' },
+  { s: 'tasks',     icon: 'tasks',        label: 'Tasks' },
+  { s: 'habits',    icon: 'flame',        label: 'Habits' },
+  { s: 'calories',  icon: 'apple',        label: 'Calories' },
+  { s: 'workout',   icon: 'activity',     label: 'Workout' },
+  { s: 'notes',     icon: 'note',         label: 'Notes' },
+  { s: 'life',      icon: 'calendar',     label: 'Life' },
+  { s: 'watchlist', icon: 'clapperboard', label: 'Watchlist' },
+  { s: 'finance',   icon: 'wallet',       label: 'Finance' },
 ]
 
 const NAV = computed(() =>
@@ -32,14 +34,14 @@ const NAV = computed(() =>
 
 <template>
   <aside class="sidebar">
-    <div class="logo"><span>🌻</span><span class="logo-text">Bloom</span></div>
+    <div class="logo"><BloomLogo :size="28" /><span class="logo-text">Bloom</span></div>
     <div class="nav-lbl">Menu</div>
     <button
       v-for="n in NAV" :key="n.s"
       class="nav-btn" :class="{ active: active === n.s }" :data-s="n.s"
       @click="emit('navigate', n.s)"
     >
-      <div class="nav-icon">{{ n.icon }}</div>
+      <div class="nav-icon"><AppIcon :name="n.icon" :size="15" /></div>
       <span>{{ n.label }}</span>
     </button>
 
@@ -49,11 +51,11 @@ const NAV = computed(() =>
         <div class="lbl" style="opacity:.6;font-size:11px;margin-top:1px">{{ monthYear }}</div>
       </div>
       <button class="foot-btn" @click="showSettings = true" title="Customize">
-        <span class="nav-icon" style="background:rgba(255,255,255,.08)">⚙️</span>
+        <span class="nav-icon" style="background:rgba(255,255,255,.08)"><AppIcon name="sliders" :size="14" /></span>
         <span>Customize</span>
       </button>
       <button class="foot-btn signout-btn" @click="emit('signout')" title="Sign out">
-        <span class="nav-icon" style="background:rgba(255,255,255,.08)">🚪</span>
+        <span class="nav-icon" style="background:rgba(255,255,255,.08)"><AppIcon name="logout" :size="14" /></span>
         <span>Sign out</span>
       </button>
     </div>
@@ -70,7 +72,7 @@ const NAV = computed(() =>
 .nav-btn { width:100%; display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); border:none; background:none; cursor:pointer; color:rgba(255,255,255,.48); font-family:'Nunito',sans-serif; font-size:13.5px; font-weight:700; margin-bottom:2px; text-align:left; transition:all .18s }
 .nav-btn:hover { background:var(--sidebar-hover); color:rgba(255,255,255,.8) }
 .nav-btn.active { background:var(--sidebar-active); color:#fff }
-.nav-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0 }
+.nav-icon { width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; color:#fff }
 .nav-btn[data-s="dashboard"] .nav-icon { background:linear-gradient(135deg,#FBBF24,#F59E0B) }
 .nav-btn[data-s="tasks"]     .nav-icon { background:linear-gradient(135deg,#10B981,#059669) }
 .nav-btn[data-s="habits"]    .nav-icon { background:linear-gradient(135deg,#F97316,#EA580C) }
