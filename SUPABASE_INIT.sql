@@ -87,10 +87,11 @@ CREATE TABLE finance_transactions (
 
 -- One row per user — stores calorie goal, finance budgets, and which sections are visible
 CREATE TABLE settings (
-  user_id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  calorie_goal     INTEGER DEFAULT 2000,
-  finance_budgets  JSONB   DEFAULT '{}',
-  visible_sections TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','finance']
+  user_id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  calorie_goal        INTEGER DEFAULT 2000,
+  finance_budgets     JSONB   DEFAULT '{}',
+  visible_sections    TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','finance'],
+  mobile_nav_sections TEXT[]  DEFAULT ARRAY['tasks','habits','calories']
 );
 
 -- ── Row Level Security ────────────────────────────────────────────

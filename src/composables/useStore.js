@@ -4,6 +4,8 @@ import { user } from './useAuth.js'
 import { today } from '../utils/date.js'
 
 export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance']
+export const MOBILE_NAV_MAX = 3
+const DEFAULT_MOBILE_NAV = ['tasks', 'habits', 'calories']
 
 export const DB = reactive({
   tasks: [],
@@ -14,7 +16,7 @@ export const DB = reactive({
   lifeCalendars: [],
   watchlist: [],
   finance: [],
-  settings: { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS] },
+  settings: { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] },
 })
 
 export const loading = ref(true)
@@ -73,12 +75,14 @@ export async function load() {
   DB.finance = finance.data || []
 
   if (settingsRes.data) {
-    DB.settings.calorieGoal     = settingsRes.data.calorie_goal
-    DB.settings.financeBudgets  = settingsRes.data.finance_budgets || {}
-    DB.settings.visibleSections = settingsRes.data.visible_sections?.filter(s => s !== 'food') || [...ALL_SECTIONS]
+    DB.settings.calorieGoal      = settingsRes.data.calorie_goal
+    DB.settings.financeBudgets   = settingsRes.data.finance_budgets || {}
+    DB.settings.visibleSections  = settingsRes.data.visible_sections?.filter(s => s !== 'food') || [...ALL_SECTIONS]
+    DB.settings.mobileNavSections = settingsRes.data.mobile_nav_sections || [...DEFAULT_MOBILE_NAV]
   } else {
     DB.settings.visibleSections = [...ALL_SECTIONS]
-    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, finance_budgets: {}, visible_sections: ALL_SECTIONS })
+    DB.settings.mobileNavSections = [...DEFAULT_MOBILE_NAV]
+    await supabase.from('settings').insert({ user_id: userId, calorie_goal: 2000, finance_budgets: {}, visible_sections: ALL_SECTIONS, mobile_nav_sections: DEFAULT_MOBILE_NAV })
   }
 
   loading.value = false
@@ -93,7 +97,7 @@ export function reset() {
   DB.lifeCalendars = []
   DB.watchlist = []
   DB.finance = []
-  DB.settings = { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS] }
+  DB.settings = { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] }
   loading.value = true
 }
 
@@ -161,9 +165,10 @@ export function deleteMeal(id) {
 export async function saveSettings(settings) {
   Object.assign(DB.settings, settings)
   await supabase.from('settings').update({
-    calorie_goal:     DB.settings.calorieGoal,
-    finance_budgets:  DB.settings.financeBudgets,
-    visible_sections: DB.settings.visibleSections,
+    calorie_goal:        DB.settings.calorieGoal,
+    finance_budgets:     DB.settings.financeBudgets,
+    visible_sections:    DB.settings.visibleSections,
+    mobile_nav_sections: DB.settings.mobileNavSections,
   }).eq('user_id', uid()).select()
 }
 

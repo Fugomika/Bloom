@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { DB, ALL_SECTIONS, saveSettings } from '../../composables/useStore.js'
+import { DB, ALL_SECTIONS, MOBILE_NAV_MAX, saveSettings } from '../../composables/useStore.js'
 import { activeSection, go } from '../../composables/useNavigation.js'
 import AppIcon from '../ui/AppIcon.vue'
 
@@ -28,8 +28,22 @@ function toggle(key) {
   const vis = DB.settings.visibleSections
   const next = vis.includes(key) ? vis.filter(s => s !== key) : [...vis, key]
   if (next.length === 0) return  // keep at least one section
-  saveSettings({ visibleSections: next })
+  const updates = { visibleSections: next }
+  if (!next.includes(key)) updates.mobileNavSections = DB.settings.mobileNavSections.filter(s => s !== key)
+  saveSettings(updates)
   if (!next.includes(activeSection.value)) go('dashboard')
+}
+
+const mobileNavCandidates = computed(() => sections.value.filter(s => s.on))
+
+function toggleMobileNav(key) {
+  const cur = DB.settings.mobileNavSections
+  if (cur.includes(key)) {
+    saveSettings({ mobileNavSections: cur.filter(s => s !== key) })
+  } else {
+    if (cur.length >= MOBILE_NAV_MAX) return
+    saveSettings({ mobileNavSections: [...cur, key] })
+  }
 }
 </script>
 
@@ -61,6 +75,30 @@ function toggle(key) {
       </div>
 
       <p class="smodal-hint">Tap a section to toggle it. Changes save instantly.</p>
+
+      <div class="mnav-divider"></div>
+
+      <div class="mnav-head">
+        <AppIcon name="menu" :size="15" />
+        <span>Bottom Nav (Mobile)</span>
+      </div>
+      <p class="smodal-sub">Pick up to {{ MOBILE_NAV_MAX }} quick-access sections — the rest live in the mobile menu</p>
+
+      <div class="stoggle-grid">
+        <button
+          v-for="s in mobileNavCandidates" :key="s.key"
+          class="stog-card mnav-card"
+          :class="{ on: DB.settings.mobileNavSections.includes(s.key) }"
+          :style="DB.settings.mobileNavSections.includes(s.key) ? `--grad:${s.grad}` : ''"
+          @click="toggleMobileNav(s.key)"
+        >
+          <div class="stog-icon-wrap" :class="{ on: DB.settings.mobileNavSections.includes(s.key) }" :style="DB.settings.mobileNavSections.includes(s.key) ? `background:${s.grad}` : ''">
+            <span class="stog-icon"><AppIcon :name="s.icon" :size="15" /></span>
+          </div>
+          <span class="stog-label">{{ s.label }}</span>
+          <span class="stog-check">{{ DB.settings.mobileNavSections.includes(s.key) ? '✓' : '' }}</span>
+        </button>
+      </div>
 
       <div class="modal-foot">
         <button class="btn btn-sun" @click="emit('close')">Done</button>
@@ -171,4 +209,21 @@ function toggle(key) {
   text-align: center;
   margin: 0 0 4px;
 }
+
+.mnav-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0 16px;
+}
+
+.mnav-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.mnav-card:not(.on) { opacity: .4 }
 </style>
