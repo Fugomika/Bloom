@@ -53,6 +53,16 @@ Detail kecil: `margin-top: auto` di footer bikin dia nempel ke bawah kartu. Kare
 
 Tombol hapus (`.wl-del`) di mode kartu di-`position: absolute` ke pojok kanan atas — `.wl-card` sudah `position: relative`, jadi tidak perlu tambahan apa-apa.
 
+### 4. Arah panah urutan ikut arah tata letak
+
+Di mode list item tersusun ke bawah, jadi panahnya `▲ ▼`. Di mode kartu item tersusun ke samping (grid mengalir kiri→kanan), jadi panah atas/bawah jadi membingungkan — arahnya tidak cocok dengan ke mana item itu benar-benar bergerak. Glyph-nya ikut mode:
+
+```vue
+{{ viewMode === 'card' ? '◀' : '▲' }}
+```
+
+Fungsi `moveUp`/`moveDown` tidak berubah — yang bergeser cuma representasi visualnya, karena "naik satu posisi di queue" di grid artinya bergerak ke kiri.
+
 ## Catatan
 
 `display: contents` pernah punya bug aksesibilitas di browser lama (elemen hilang dari accessibility tree). Sudah beres di semua browser modern, dan di sini wrapper-nya cuma `div` tanpa makna semantik, jadi aman.

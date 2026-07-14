@@ -237,8 +237,8 @@ function startWatching() {
 
             <template v-else>
               <div v-if="item.status === 'queued'" class="wl-arrows">
-                <button class="wl-arr" @click.stop="moveUp(item)"   title="Naikkan urutan">▲</button>
-                <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">▼</button>
+                <button class="wl-arr" @click.stop="moveUp(item)"   title="Naikkan urutan">{{ viewMode === 'card' ? '◀' : '▲' }}</button>
+                <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">{{ viewMode === 'card' ? '▶' : '▼' }}</button>
               </div>
               <button class="wl-action" @click.stop="cycleStatus(item)" :title="NEXT_TITLE[item.status]">
                 <AppIcon :name="NEXT_ICON[item.status]" :size="15" />
