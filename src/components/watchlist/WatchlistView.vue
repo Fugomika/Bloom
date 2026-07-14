@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { DB, addWatchItem, updateWatchItem, deleteWatchItem, reorderWatchQueue } from '../../composables/useStore.js'
 import { uid } from '../../utils/date.js'
 import AppIcon from '../ui/AppIcon.vue'
@@ -12,7 +12,12 @@ const PRIORITY_CFG = {
 const PRIORITY_ORDER  = { must: 0, want: 1, chill: 2 }
 const PRIORITY_WEIGHT = { must: 5, want: 2, chill: 1 }
 
+const VIEW_KEY = 'bloom_watchlist_view'
+
 const tFilter   = ref('all')
+const viewMode  = ref(localStorage.getItem(VIEW_KEY) === 'card' ? 'card' : 'column')
+watch(viewMode, v => localStorage.setItem(VIEW_KEY, v))
+
 const showModal = ref(false)
 const editId    = ref(null)
 const fTitle    = ref('')
@@ -181,14 +186,25 @@ function startWatching() {
       <button class="wl-banner-btn" @click="openPicker">Pilih!</button>
     </div>
 
-    <div class="ftabs" style="margin-bottom:18px">
-      <button class="ftab" :class="{ active: tFilter === 'all' }"      @click="tFilter = 'all'">Semua ({{ allItems.length }})</button>
-      <button class="ftab" :class="{ active: tFilter === 'watching' }" @click="tFilter = 'watching'">Nonton ({{ watching.length }})</button>
-      <button class="ftab" :class="{ active: tFilter === 'queue' }"    @click="tFilter = 'queue'">Queue ({{ queued.length }})</button>
-      <button class="ftab" :class="{ active: tFilter === 'done' }"     @click="tFilter = 'done'">Selesai ({{ done.length }})</button>
+    <div class="wl-filter-row">
+      <div class="ftabs">
+        <button class="ftab" :class="{ active: tFilter === 'all' }"      @click="tFilter = 'all'">Semua ({{ allItems.length }})</button>
+        <button class="ftab" :class="{ active: tFilter === 'watching' }" @click="tFilter = 'watching'">Nonton ({{ watching.length }})</button>
+        <button class="ftab" :class="{ active: tFilter === 'queue' }"    @click="tFilter = 'queue'">Queue ({{ queued.length }})</button>
+        <button class="ftab" :class="{ active: tFilter === 'done' }"     @click="tFilter = 'done'">Selesai ({{ done.length }})</button>
+      </div>
+
+      <div class="wl-view-toggle">
+        <button class="wl-vt" :class="{ on: viewMode === 'column' }" @click="viewMode = 'column'" title="Tampilan list">
+          <AppIcon name="rows" :size="15" />
+        </button>
+        <button class="wl-vt" :class="{ on: viewMode === 'card' }" @click="viewMode = 'card'" title="Tampilan kartu">
+          <AppIcon name="grid" :size="15" />
+        </button>
+      </div>
     </div>
 
-    <div class="wl-list">
+    <div class="wl-list" :class="{ 'wl-list-card': viewMode === 'card' }">
       <template v-if="filtered.length">
         <div v-for="item in filtered" :key="item.id"
              class="wl-card" :class="`wl-${item.status}`">
@@ -209,25 +225,27 @@ function startWatching() {
             </div>
           </div>
 
-          <!-- Inline delete confirmation -->
-          <template v-if="deleteConfirmId === item.id">
-            <div class="wl-confirm">
-              <span class="wl-confirm-text">Hapus?</span>
-              <button class="wl-confirm-yes" @click.stop="executeDelete(item.id)">Hapus</button>
-              <button class="wl-confirm-no"  @click.stop="cancelDelete()">Batal</button>
-            </div>
-          </template>
+          <div class="wl-actions">
+            <!-- Inline delete confirmation -->
+            <template v-if="deleteConfirmId === item.id">
+              <div class="wl-confirm">
+                <span class="wl-confirm-text">Hapus?</span>
+                <button class="wl-confirm-yes" @click.stop="executeDelete(item.id)">Hapus</button>
+                <button class="wl-confirm-no"  @click.stop="cancelDelete()">Batal</button>
+              </div>
+            </template>
 
-          <template v-else>
-            <div v-if="item.status === 'queued'" class="wl-arrows">
-              <button class="wl-arr" @click.stop="moveUp(item)"   title="Naikkan urutan">▲</button>
-              <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">▼</button>
-            </div>
-            <button class="wl-action" @click.stop="cycleStatus(item)" :title="NEXT_TITLE[item.status]">
-              <AppIcon :name="NEXT_ICON[item.status]" :size="15" />
-            </button>
-            <button class="wl-del" @click.stop="confirmDelete(item.id)">✕</button>
-          </template>
+            <template v-else>
+              <div v-if="item.status === 'queued'" class="wl-arrows">
+                <button class="wl-arr" @click.stop="moveUp(item)"   title="Naikkan urutan">▲</button>
+                <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">▼</button>
+              </div>
+              <button class="wl-action" @click.stop="cycleStatus(item)" :title="NEXT_TITLE[item.status]">
+                <AppIcon :name="NEXT_ICON[item.status]" :size="15" />
+              </button>
+              <button class="wl-del" @click.stop="confirmDelete(item.id)">✕</button>
+            </template>
+          </div>
         </div>
       </template>
 
@@ -364,8 +382,27 @@ function startWatching() {
 }
 .wl-banner-btn:hover { background:#FCD34D }
 
+/* ── Filter row + view toggle ────────────────────────────────── */
+.wl-filter-row { display:flex; align-items:center; gap:12px; margin-bottom:18px }
+.wl-filter-row .ftabs { flex:1; min-width:0 }
+
+.wl-view-toggle {
+  display:flex; gap:2px; flex-shrink:0; padding:3px;
+  background:var(--bg); border:2px solid var(--border); border-radius:var(--r-sm);
+}
+.wl-vt {
+  width:32px; height:28px; border:none; border-radius:7px; background:transparent;
+  cursor:pointer; color:var(--muted); transition:all .15s;
+  display:flex; align-items:center; justify-content:center;
+}
+.wl-vt:hover  { color:var(--sun-dk) }
+.wl-vt.on     { background:var(--surface); color:var(--sun-dk); box-shadow:var(--sh) }
+
 /* ── List ────────────────────────────────────────────────────── */
 .wl-list { display:flex; flex-direction:column; gap:10px }
+
+/* Actions wrap is transparent in list mode — card mode turns it into a footer row */
+.wl-actions { display:contents }
 
 .wl-card {
   display:flex; align-items:center; gap:12px;
@@ -433,6 +470,32 @@ function startWatching() {
   font-size:11px; font-weight:800; transition:all .15s;
 }
 .wl-confirm-no:hover { border-color:var(--sun); color:var(--sun-dk) }
+
+/* ── Card grid mode ──────────────────────────────────────────── */
+.wl-list-card {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px;
+}
+.wl-list-card .empty { grid-column:1 / -1 }
+
+.wl-list-card .wl-card {
+  flex-direction:column; align-items:center; text-align:center;
+  gap:10px; padding:20px 14px 12px;
+}
+.wl-list-card .wl-type-icon { width:56px; height:56px; font-size:30px; border-radius:16px }
+.wl-list-card .wl-body { flex:none; width:100% }
+.wl-list-card .wl-title {
+  white-space:normal; text-overflow:clip; line-height:1.3; min-height:2.6em;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+}
+.wl-list-card .wl-meta { justify-content:center }
+
+.wl-list-card .wl-actions {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; margin-top:auto; padding-top:10px; border-top:1.5px solid var(--border);
+}
+.wl-list-card .wl-arrows  { flex-direction:row }
+.wl-list-card .wl-confirm { width:100%; justify-content:center }
+.wl-list-card .wl-del     { position:absolute; top:8px; right:8px }
 
 /* ── Modal segments ──────────────────────────────────────────── */
 .wl-seg-label { font-size:11px; font-weight:900; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; margin-top:4px }
@@ -504,5 +567,14 @@ function startWatching() {
   .wlp-mood-row { gap:6px }
   .wlp-mood { padding:6px 10px; font-size:11px }
   .wl-badge-pri { display:none }
+
+  .wl-filter-row { flex-wrap:wrap }
+  .wl-filter-row .ftabs { flex:1 1 100% }
+  .wl-view-toggle { margin-left:auto }
+
+  .wl-list-card { grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:10px }
+  .wl-list-card .wl-card { padding:16px 10px 10px }
+  .wl-list-card .wl-type-icon { width:48px; height:48px; font-size:26px }
+  .wl-list-card .wl-title { font-size:14px }
 }
 </style>
