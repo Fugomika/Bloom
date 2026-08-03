@@ -7,7 +7,7 @@ defineProps({
   meta: { type: Object, required: true },
   active: String,
 })
-const emit = defineEmits(['navigate', 'close'])
+const emit = defineEmits(['navigate', 'close', 'signout'])
 </script>
 
 <template>
@@ -26,6 +26,11 @@ const emit = defineEmits(['navigate', 'close'])
       >
         <span class="mdi-icon"><AppIcon :name="meta[s].icon" :size="18" /></span>
         <span class="mdi-label">{{ meta[s].label }}</span>
+      </button>
+      <div class="mdrawer-divider"></div>
+      <button class="mdrawer-item mdrawer-signout" @click="emit('signout')">
+        <span class="mdi-icon"><AppIcon name="logout" :size="18" /></span>
+        <span class="mdi-label">Sign out</span>
       </button>
     </aside>
   </div>
@@ -94,4 +99,6 @@ const emit = defineEmits(['navigate', 'close'])
 .mdrawer-item:hover { background: var(--sidebar-hover); color: rgba(255,255,255,.85) }
 .mdrawer-item.active { background: var(--sidebar-active); color: #fff }
 .mdi-icon { display: flex; flex-shrink: 0 }
+.mdrawer-divider { height: 1px; background: rgba(255,255,255,.08); margin: 8px 4px }
+.mdrawer-signout:hover { background: rgba(239,68,68,.18); color: rgba(255,100,100,.9) }
 </style>

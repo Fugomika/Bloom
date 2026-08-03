@@ -5,7 +5,7 @@ import AppIcon from '../ui/AppIcon.vue'
 import AppMobileDrawer from './AppMobileDrawer.vue'
 
 defineProps({ active: String })
-const emit = defineEmits(['navigate'])
+const emit = defineEmits(['navigate', 'signout'])
 
 const NAV_META = {
   dashboard: { icon: 'home',         label: 'Home' },
@@ -50,7 +50,6 @@ function navigate(s) {
         <span class="bi"><AppIcon :name="n.icon" :size="19" /></span>{{ n.label }}
       </button>
       <button
-        v-if="overflowSections.length"
         class="bnav-btn bnav-more" :class="{ active: overflowSections.includes(active) }"
         @click="showDrawer = true"
       >
@@ -66,5 +65,6 @@ function navigate(s) {
     :active="active"
     @navigate="navigate"
     @close="showDrawer = false"
+    @signout="$emit('signout')"
   />
 </template>

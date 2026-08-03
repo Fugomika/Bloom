@@ -69,7 +69,7 @@ async function handleSignOut() {
       <WatchlistView    :class="['section', activeSection === 'watchlist' ? 'active' : '']" />
       <FinanceView      :class="['section', activeSection === 'finance'   ? 'active' : '']" />
     </main>
-    <AppBottomNav :active="activeSection" @navigate="go" />
+    <AppBottomNav :active="activeSection" @navigate="go" @signout="handleSignOut" />
   </template>
 </template>
 
