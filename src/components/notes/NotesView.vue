@@ -82,7 +82,9 @@ function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]}
 <style scoped>
 .notes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(236px,1fr)); gap:12px }
 .note-card { border-radius:var(--r); padding:18px; cursor:pointer; position:relative; min-height:148px; transition:all .2s; animation:fadeUp .22s ease }
-.note-card:hover { transform:translateY(-5px) rotate(.4deg); box-shadow:var(--sh-lg) }
+@media (hover:hover) and (pointer:fine) {
+  .note-card:hover { transform:translateY(-5px) rotate(.4deg); box-shadow:var(--sh-lg) }
+}
 .note-card h3 { font-family:'Fredoka One',cursive; font-size:16px; margin-bottom:7px }
 .note-card p { font-size:13px; font-weight:600; opacity:.7; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; line-height:1.55; white-space:pre-line }
 .note-ts { position:absolute; bottom:11px; right:12px; font-size:10px; font-weight:800; opacity:.45 }
@@ -90,5 +92,8 @@ function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]}
 .note-card:hover .note-del { opacity:1 }
 .note-del:hover { background:rgba(220,38,38,.18) }
 .cs { width:27px; height:27px; border-radius:50%; border:3px solid transparent; cursor:pointer; transition:transform .18s }
-.cs:hover, .cs.on { transform:scale(1.22); border-color:var(--text) }
+.cs.on { transform:scale(1.22); border-color:var(--text) }
+@media (hover:hover) and (pointer:fine) {
+  .cs:hover { transform:scale(1.22); border-color:var(--text) }
+}
 </style>

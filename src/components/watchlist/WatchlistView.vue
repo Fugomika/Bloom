@@ -443,7 +443,10 @@ function startWatching() {
   cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;
   flex-shrink:0; transition:all .15s;
 }
-.wl-action:hover { background:var(--sun); transform:scale(1.1) }
+.wl-action:hover { background:var(--sun) }
+@media (hover:hover) and (pointer:fine) {
+  .wl-action:hover { transform:scale(1.1) }
+}
 
 .wl-del {
   width:28px; height:28px; border:none; background:transparent; border-radius:7px;

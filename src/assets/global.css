@@ -19,12 +19,14 @@
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box }
 ::-webkit-scrollbar { width:5px }
 ::-webkit-scrollbar-thumb { background:rgba(0,0,0,.12); border-radius:3px }
-body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden }
+/* height:100vh is a static fallback; 100dvh tracks iOS Safari's collapsing
+   address bar / keyboard so layout doesn't jump while scrolling or typing */
+body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); height:100vh; height:100dvh; overflow:hidden }
 /* #app is the flex row container that replaces body's original flex role */
-#app { display:flex; height:100vh; overflow:hidden; width:100% }
+#app { display:flex; height:100vh; height:100dvh; overflow:hidden; width:100% }
 
 /* ── MAIN ── */
-.main { flex:1; overflow-y:auto; height:100vh }
+.main { flex:1; overflow-y:auto; height:100vh; height:100dvh }
 .section { display:none; padding:28px 32px; min-height:100%; animation:fadeUp .28s ease }
 .section.active { display:block }
 .sec-head { margin-bottom:24px }
@@ -51,13 +53,20 @@ input:focus,textarea:focus,select:focus {
 /* ── BUTTONS ── */
 .btn { font-family:'Nunito',sans-serif; font-weight:900; font-size:14px; padding:9px 18px; border:none; border-radius:var(--r-sm); cursor:pointer; transition:all .18s; display:inline-flex; align-items:center; gap:6px; white-space:nowrap }
 .btn-sun  { background:var(--sun); color:#1A0E00 }
-.btn-sun:hover  { background:var(--gold); transform:translateY(-2px); box-shadow:0 4px 14px rgba(251,191,36,.4) }
+.btn-sun:hover  { background:var(--gold); box-shadow:0 4px 14px rgba(251,191,36,.4) }
 .btn-leaf { background:var(--leaf); color:#fff }
-.btn-leaf:hover { background:var(--leaf-dk); transform:translateY(-2px); box-shadow:0 4px 14px rgba(34,197,94,.35) }
+.btn-leaf:hover { background:var(--leaf-dk); box-shadow:0 4px 14px rgba(34,197,94,.35) }
 .btn-red  { background:var(--red); color:#fff }
-.btn-red:hover  { background:#DC2626; transform:translateY(-2px) }
+.btn-red:hover  { background:#DC2626 }
 .btn-ghost { background:rgba(0,0,0,.05); color:var(--muted) }
 .btn-ghost:hover { background:rgba(0,0,0,.09); color:var(--text) }
+/* :hover sticks after a tap on touch devices — gate movement-based hover
+   effects to real pointer devices so buttons don't appear to shift on tap */
+@media (hover:hover) and (pointer:fine) {
+  .btn-sun:hover  { transform:translateY(-2px) }
+  .btn-leaf:hover { transform:translateY(-2px) }
+  .btn-red:hover  { transform:translateY(-2px) }
+}
 
 /* ── FILTER TABS ── */
 .ftabs { display:flex; gap:3px; background:rgba(0,0,0,.05); border-radius:11px; padding:4px; width:fit-content; margin-bottom:15px }
@@ -73,7 +82,7 @@ input:focus,textarea:focus,select:focus {
 /* ── MODALS ── */
 .overlay { position:fixed; inset:0; background:rgba(26,14,0,.45); backdrop-filter:blur(5px); z-index:200; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .22s }
 .overlay.open { opacity:1; pointer-events:all }
-.modal { background:#fff; border-radius:var(--r); width:92%; max-width:540px; max-height:90vh; overflow-y:auto; padding:26px; transform:scale(.94) translateY(12px); transition:transform .22s; box-shadow:0 24px 70px rgba(0,0,0,.2) }
+.modal { background:#fff; border-radius:var(--r); width:92%; max-width:540px; max-height:90vh; max-height:90dvh; overflow-y:auto; padding:26px; transform:scale(.94) translateY(12px); transition:transform .22s; box-shadow:0 24px 70px rgba(0,0,0,.2) }
 .overlay.open .modal { transform:scale(1) translateY(0) }
 .modal-head { font-family:'Fredoka One',cursive; font-size:21px; margin-bottom:15px }
 .modal textarea { min-height:160px; resize:vertical }
@@ -115,5 +124,8 @@ input:focus,textarea:focus,select:focus {
   .form-row { flex-direction:column }
   .sec-head h1 { font-size:26px }
   .modal { padding:20px 16px }
+  /* iOS Safari auto-zooms on focus when the focused field's font-size is
+     under 16px — bump it up on mobile only, desktop keeps the 14px look */
+  input[type=text],input[type=date],input[type=number],textarea,select { font-size:16px }
 }
 @media(max-width:360px) { .bnav-btn { font-size:8px } }

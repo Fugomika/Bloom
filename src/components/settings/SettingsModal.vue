@@ -165,7 +165,10 @@ function toggleMobileNav(key) {
   box-shadow: 0 2px 12px rgba(0,0,0,.1);
 }
 .stog-card:not(.on) { opacity: .5 }
-.stog-card:hover { transform: translateY(-2px); opacity: 1 }
+.stog-card:hover { opacity: 1 }
+@media (hover:hover) and (pointer:fine) {
+  .stog-card:hover { transform: translateY(-2px) }
+}
 
 .stog-icon-wrap {
   width: 34px;

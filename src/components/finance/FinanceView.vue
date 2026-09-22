@@ -335,7 +335,9 @@ const EMPTY_MSG = {
 /* ── Stats ───────────────────────────────────────────────────── */
 .fin-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px }
 .fin-stat { border-radius:var(--r); padding:20px 18px; color:#fff; position:relative; overflow:hidden; transition:transform .2s,box-shadow .2s }
-.fin-stat:hover { transform:translateY(-4px); box-shadow:var(--sh-md) }
+@media (hover:hover) and (pointer:fine) {
+  .fin-stat:hover { transform:translateY(-4px); box-shadow:var(--sh-md) }
+}
 .fin-stat.fs-pos, .fin-stat.fs-income { background:linear-gradient(135deg,#22C55E,#15803D) }
 .fin-stat.fs-neg { background:linear-gradient(135deg,#EF4444,#DC2626) }
 .fin-stat.fs-expense { background:linear-gradient(135deg,#F97316,#DC2626) }
@@ -366,7 +368,9 @@ const EMPTY_MSG = {
   background:var(--surface); border-radius:var(--r-sm); padding:11px 14px;
   box-shadow:var(--sh); transition:all .18s; animation:fadeUp .2s ease; position:relative;
 }
-.fin-item:hover { transform:translateX(2px) }
+@media (hover:hover) and (pointer:fine) {
+  .fin-item:hover { transform:translateX(2px) }
+}
 
 .fin-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0 }
 .fin-body { flex:1; min-width:0; cursor:pointer }

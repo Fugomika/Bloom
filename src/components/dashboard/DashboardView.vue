@@ -159,7 +159,9 @@ function qHabit(id) {
 .greeting-sub { font-size:14px; font-weight:700; color:var(--muted); margin:3px 0 24px }
 .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px }
 .stat { border-radius:var(--r); padding:20px 18px; color:#fff; position:relative; overflow:hidden; transition:transform .2s,box-shadow .2s; cursor:default }
-.stat:hover { transform:translateY(-4px); box-shadow:var(--sh-md) }
+@media (hover:hover) and (pointer:fine) {
+  .stat:hover { transform:translateY(-4px); box-shadow:var(--sh-md) }
+}
 .stat.c-sun   { background:linear-gradient(135deg,#FBBF24,#D97706) }
 .stat.c-leaf  { background:linear-gradient(135deg,#22C55E,#15803D) }
 .stat.c-coral { background:linear-gradient(135deg,#F97316,#EA580C) }

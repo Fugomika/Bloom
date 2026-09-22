@@ -480,7 +480,10 @@ const calYearRange = computed(() => {
 /* Calendar list */
 .cl-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(256px,1fr)); gap:14px; margin-bottom:20px }
 .cl-card { background:var(--surface); border-radius:var(--r); padding:18px; box-shadow:var(--sh); cursor:pointer; border:2px solid transparent; transition:all .2s; animation:fadeUp .22s ease }
-.cl-card:hover { border-color:var(--sun-lt); transform:translateY(-3px); box-shadow:var(--sh-md) }
+.cl-card:hover { border-color:var(--sun-lt) }
+@media (hover:hover) and (pointer:fine) {
+  .cl-card:hover { transform:translateY(-3px); box-shadow:var(--sh-md) }
+}
 .cl-head { display:flex; align-items:flex-start; gap:12px; margin-bottom:8px }
 .cl-icon { width:42px; height:42px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0 }
 .cl-name { font-family:'Fredoka One',cursive; font-size:17px }
@@ -500,14 +503,16 @@ const calYearRange = computed(() => {
 /* Stats */
 .life-stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:14px }
 .life-stat { background:var(--surface); border-radius:var(--r); padding:16px 12px; text-align:center; box-shadow:var(--sh); transition:transform .2s }
-.life-stat:hover { transform:translateY(-3px) }
+@media (hover:hover) and (pointer:fine) {
+  .life-stat:hover { transform:translateY(-3px) }
+}
 .life-stat .ls-n { font-family:'Fredoka One',cursive; font-size:22px; line-height:1.2 }
 .life-stat .ls-l { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-top:3px }
 
 /* Two-column layout */
 .life-two-col { display:grid; grid-template-columns:max-content 1fr; gap:16px; align-items:start }
 .life-grid-card { overflow-x:auto }
-@media(min-width:861px) { .life-events-card { position:sticky; top:16px; max-height:calc(100vh - 80px); overflow-y:auto } }
+@media(min-width:861px) { .life-events-card { position:sticky; top:16px; max-height:calc(100vh - 80px); max-height:calc(100dvh - 80px); overflow-y:auto } }
 @media(max-width:860px) {
   .life-two-col { grid-template-columns:1fr }
   .life-grid-card { display:flex; flex-direction:column; align-items:center }
@@ -525,7 +530,9 @@ const calYearRange = computed(() => {
 .life-month-hdrs { display:flex; gap:2px }
 .life-months { display:flex; gap:2px }
 .ldot { width:10px; height:10px; border-radius:50%; flex-shrink:0; cursor:pointer; transition:transform .15s }
-.ldot:hover { transform:scale(1.65); z-index:2; position:relative }
+@media (hover:hover) and (pointer:fine) {
+  .ldot:hover { transform:scale(1.65); z-index:2; position:relative }
+}
 .ldot.future { background:rgba(0,0,0,.06) }
 .ldot.empty-past { background:rgba(0,0,0,.1) }
 .ldot.current { z-index:2; position:relative; animation:ldotPulse 2s ease-in-out infinite }
@@ -545,7 +552,9 @@ const calYearRange = computed(() => {
 
 /* Events */
 .evt-card { display:flex; align-items:flex-start; gap:12px; padding:11px 14px; background:var(--bg); border-radius:var(--r-sm); border-left:4px solid var(--ec,#FBBF24); transition:all .18s; animation:fadeUp .22s ease; margin-bottom:12px }
-.evt-card:hover { transform:translateX(2px) }
+@media (hover:hover) and (pointer:fine) {
+  .evt-card:hover { transform:translateX(2px) }
+}
 .evt-emoji { font-size:20px; flex-shrink:0; line-height:1; padding-top:1px }
 .evt-info { flex:1; min-width:0 }
 .evt-title { font-weight:800; font-size:13px }
@@ -568,10 +577,16 @@ const calYearRange = computed(() => {
 .life-sel-x { border:none; background:rgba(0,0,0,.08); border-radius:6px; cursor:pointer; font-size:12px; padding:3px 8px; color:var(--muted); font-family:'Nunito',sans-serif; font-weight:900; transition:background .15s }
 .life-sel-x:hover { background:rgba(0,0,0,.14) }
 .life-sel-evt { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:var(--r-xs); cursor:pointer; transition:all .15s; margin-bottom:5px; border-left:3px solid transparent }
-.life-sel-evt:hover { transform:translateX(2px); filter:brightness(.97) }
+.life-sel-evt:hover { filter:brightness(.97) }
+@media (hover:hover) and (pointer:fine) {
+  .life-sel-evt:hover { transform:translateX(2px) }
+}
 
 /* Color picker row (modal) */
 .ecol-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:5px }
 .ecswatch { width:26px; height:26px; border-radius:50%; border:3px solid transparent; cursor:pointer; transition:transform .18s }
-.ecswatch.on, .ecswatch:hover { transform:scale(1.25); border-color:var(--text) }
+.ecswatch.on { transform:scale(1.25); border-color:var(--text) }
+@media (hover:hover) and (pointer:fine) {
+  .ecswatch:hover { transform:scale(1.25); border-color:var(--text) }
+}
 </style>

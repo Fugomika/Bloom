@@ -116,6 +116,7 @@ async function google() {
 <style scoped>
 .login-bg {
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   background: linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 45%, #FFF7ED 100%);
   display: flex;
@@ -353,5 +354,8 @@ async function google() {
 @media (max-width: 440px) {
   .login-card { padding: 32px 22px 26px; border-radius: 22px }
   .brand-name { font-size: 32px }
+}
+@media (max-width: 600px) {
+  .field input { font-size: 16px }
 }
 </style>

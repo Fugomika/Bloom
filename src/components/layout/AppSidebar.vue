@@ -65,7 +65,7 @@ const NAV = computed(() =>
 </template>
 
 <style scoped>
-.sidebar { width:228px; height:100vh; background:var(--sidebar); display:flex; flex-direction:column; padding:18px 10px; flex-shrink:0; z-index:20; overflow-y:auto }
+.sidebar { width:228px; height:100vh; height:100dvh; background:var(--sidebar); display:flex; flex-direction:column; padding:18px 10px; flex-shrink:0; z-index:20; overflow-y:auto }
 .logo { display:flex; align-items:center; gap:10px; padding:6px 12px 20px; font-family:'Fredoka One',cursive; font-size:25px; color:#fff }
 .logo-text { background:linear-gradient(135deg,#FBBF24 0%,#F59E0B 60%,#D97706 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text }
 .nav-lbl { font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.22); padding:0 12px; margin:4px 0 5px }

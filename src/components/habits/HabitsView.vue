@@ -92,7 +92,9 @@ const w = last7()
 <style scoped>
 .habits-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:13px }
 .habit-card { background:var(--surface); border-radius:var(--r); padding:18px; box-shadow:var(--sh); border:2px solid var(--border); transition:all .2s; animation:fadeUp .22s ease }
-.habit-card:hover { transform:translateY(-5px); box-shadow:var(--sh-md) }
+@media (hover:hover) and (pointer:fine) {
+  .habit-card:hover { transform:translateY(-5px); box-shadow:var(--sh-md) }
+}
 .habit-head { display:flex; align-items:flex-start; gap:11px; margin-bottom:13px }
 .h-emoji-wrap { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0 }
 .h-name { font-family:'Fredoka One',cursive; font-size:16px }

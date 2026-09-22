@@ -145,7 +145,10 @@ const EMPTY = {
 
 .task-list { display:flex; flex-direction:column; gap:8px }
 .task-item { background:var(--surface); border-radius:var(--r-sm); padding:12px 16px; display:flex; align-items:center; gap:12px; box-shadow:var(--sh); border:2px solid transparent; transition:all .18s; animation:fadeUp .22s ease }
-.task-item:hover { border-color:var(--sun-lt); transform:translateX(3px) }
+.task-item:hover { border-color:var(--sun-lt) }
+@media (hover:hover) and (pointer:fine) {
+  .task-item:hover { transform:translateX(3px) }
+}
 .task-item.done { opacity:.55 }
 .task-item.done .task-title { text-decoration:line-through }
 .chk { width:22px; height:22px; border-radius:7px; border:2.5px solid #D1D5DB; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; transition:all .18s; user-select:none }

@@ -138,7 +138,9 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
 .meal-group-head { font-family:'Fredoka One',cursive; font-size:16px; display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:2px solid var(--border); margin-bottom:7px }
 .meal-group-cal { font-size:12px; font-weight:800; color:var(--muted) }
 .meal-item { display:flex; align-items:center; gap:11px; padding:9px 13px; background:var(--surface); border-radius:var(--r-sm); margin-bottom:5px; box-shadow:var(--sh); transition:all .18s; animation:fadeUp .2s ease }
-.meal-item:hover { transform:translateX(2px) }
+@media (hover:hover) and (pointer:fine) {
+  .meal-item:hover { transform:translateX(2px) }
+}
 .meal-name { flex:1; font-weight:700; font-size:13px }
 .meal-cal { font-family:'Fredoka One',cursive; font-size:14px; color:var(--sun-dk) }
 .meal-del { opacity:0; border:none; background:none; cursor:pointer; font-size:12px; color:var(--muted); padding:3px 5px; border-radius:5px; transition:all .15s }

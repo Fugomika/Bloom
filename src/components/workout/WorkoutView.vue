@@ -131,7 +131,10 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
 .section-lbl { font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:10px }
 .wkt-top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px }
 .wkt-card { background:var(--surface); border-radius:var(--r); padding:18px; box-shadow:var(--sh); margin-bottom:11px; border:2px solid var(--border); animation:fadeUp .22s ease; transition:all .18s }
-.wkt-card:hover { border-color:rgba(239,68,68,.2); transform:translateX(3px) }
+.wkt-card:hover { border-color:rgba(239,68,68,.2) }
+@media (hover:hover) and (pointer:fine) {
+  .wkt-card:hover { transform:translateX(3px) }
+}
 .wkt-head { display:flex; align-items:center; gap:11px; margin-bottom:12px }
 .wkt-icon { width:40px; height:40px; border-radius:11px; background:linear-gradient(135deg,#EF4444,#DC2626); display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0 }
 .wkt-name { font-family:'Fredoka One',cursive; font-size:16px }
@@ -154,4 +157,7 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
 .wex-del:hover { background:rgba(239,68,68,.2) }
 .add-ex-btn { width:100%; padding:9px; border:2px dashed rgba(0,0,0,.12); border-radius:var(--r-xs); background:none; cursor:pointer; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; color:var(--muted); transition:all .18s; margin-bottom:10px }
 .add-ex-btn:hover { border-color:var(--red); color:var(--red); background:var(--red-lt) }
+@media(max-width:600px) {
+  .wex-top input, .wex-bot input { font-size:16px }
+}
 </style>
