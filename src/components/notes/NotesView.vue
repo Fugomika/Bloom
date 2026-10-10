@@ -88,9 +88,11 @@ function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]}
 .note-card h3 { font-family:'Fredoka One',cursive; font-size:16px; margin-bottom:7px }
 .note-card p { font-size:13px; font-weight:600; opacity:.7; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; line-height:1.55; white-space:pre-line }
 .note-ts { position:absolute; bottom:11px; right:12px; font-size:10px; font-weight:800; opacity:.45 }
-.note-del { position:absolute; top:9px; right:9px; width:24px; height:24px; border-radius:7px; border:none; cursor:pointer; opacity:0; transition:opacity .15s; background:rgba(0,0,0,.1); font-size:10px; display:flex; align-items:center; justify-content:center }
+.note-del { position:absolute; top:9px; right:9px; width:32px; height:32px; border-radius:9px; border:none; cursor:pointer; opacity:0; transition:opacity .15s; background:rgba(0,0,0,.1); font-size:11px; display:flex; align-items:center; justify-content:center }
 .note-card:hover .note-del { opacity:1 }
 .note-del:hover { background:rgba(220,38,38,.18) }
+/* touch devices have no hover — keep delete visible so notes stay deletable */
+@media (hover: none) { .note-del { opacity:1; background:rgba(0,0,0,.14) } }
 .cs { width:27px; height:27px; border-radius:50%; border:3px solid transparent; cursor:pointer; transition:transform .18s }
 .cs.on { transform:scale(1.22); border-color:var(--text) }
 @media (hover:hover) and (pointer:fine) {

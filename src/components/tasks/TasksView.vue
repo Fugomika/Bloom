@@ -157,7 +157,9 @@ const EMPTY = {
 .task-title { flex:1; font-weight:700; font-size:14px }
 .due { font-size:11px; font-weight:800; color:var(--muted); white-space:nowrap; display:inline-flex; align-items:center; gap:4px }
 .due.late { color:#DC2626 }
-.del-btn { opacity:0; border:none; background:none; cursor:pointer; color:var(--muted); padding:4px 6px; border-radius:6px; transition:all .15s; flex-shrink:0; display:flex; align-items:center }
+.del-btn { opacity:0; border:none; background:none; cursor:pointer; color:var(--muted); padding:8px; border-radius:6px; transition:all .15s; flex-shrink:0; display:flex; align-items:center }
 .task-item:hover .del-btn { opacity:1 }
 .del-btn:hover { background:#FEE2E2; color:#DC2626 }
+/* touch devices have no hover — keep delete visible so items stay deletable */
+@media (hover: none) { .del-btn { opacity:.55 } }
 </style>

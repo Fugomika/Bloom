@@ -355,7 +355,8 @@ async function google() {
   .login-card { padding: 32px 22px 26px; border-radius: 22px }
   .brand-name { font-size: 32px }
 }
-@media (max-width: 600px) {
+/* 16px keeps iOS from auto-zooming the field on focus (any touch device) */
+@media (pointer: coarse) {
   .field input { font-size: 16px }
 }
 </style>

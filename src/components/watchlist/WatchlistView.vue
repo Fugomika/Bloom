@@ -455,6 +455,8 @@ function startWatching() {
 }
 .wl-card:hover .wl-del { opacity:1 }
 .wl-del:hover { background:rgba(239,68,68,.12); color:#EF4444 }
+/* touch devices have no hover — keep delete clearly visible */
+@media (hover: none) { .wl-del { opacity:.7 } }
 
 /* ── Inline delete confirm ───────────────────────────────────── */
 .wl-confirm {

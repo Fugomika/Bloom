@@ -17,6 +17,10 @@
 }
 
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box }
+/* stop iOS resizing text on orientation change (a source of layout jumps) */
+html { -webkit-text-size-adjust:100%; text-size-adjust:100% }
+/* kills the 300ms tap delay + double-tap-to-zoom on controls */
+button, a, .chk, [role=button] { touch-action:manipulation }
 ::-webkit-scrollbar { width:5px }
 ::-webkit-scrollbar-thumb { background:rgba(0,0,0,.12); border-radius:3px }
 /* height:100vh is a static fallback; 100dvh tracks iOS Safari's collapsing
@@ -26,7 +30,8 @@ body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text);
 #app { display:flex; height:100vh; height:100dvh; overflow:hidden; width:100% }
 
 /* ── MAIN ── */
-.main { flex:1; overflow-y:auto; height:100vh; height:100dvh }
+/* overflow-x:hidden guards against any wide child shifting the page sideways */
+.main { flex:1; overflow-y:auto; overflow-x:hidden; height:100vh; height:100dvh }
 .section { display:none; padding:28px 32px; min-height:100%; animation:fadeUp .28s ease }
 .section.active { display:block }
 .sec-head { margin-bottom:24px }
@@ -69,8 +74,8 @@ input:focus,textarea:focus,select:focus {
 }
 
 /* ── FILTER TABS ── */
-.ftabs { display:flex; gap:3px; background:rgba(0,0,0,.05); border-radius:11px; padding:4px; width:fit-content; margin-bottom:15px }
-.ftab { padding:6px 15px; border-radius:8px; font-size:12px; font-weight:900; border:none; background:transparent; color:var(--muted); cursor:pointer; font-family:'Nunito',sans-serif; transition:all .18s }
+.ftabs { display:flex; gap:3px; background:rgba(0,0,0,.05); border-radius:11px; padding:4px; width:fit-content; max-width:100%; margin-bottom:15px }
+.ftab { padding:6px 15px; border-radius:8px; font-size:12px; font-weight:900; border:none; background:transparent; color:var(--muted); cursor:pointer; font-family:'Nunito',sans-serif; transition:all .18s; white-space:nowrap }
 .ftab.active { background:#fff; color:var(--text); box-shadow:var(--sh) }
 
 /* ── BADGE ── */
@@ -124,8 +129,19 @@ input:focus,textarea:focus,select:focus {
   .form-row { flex-direction:column }
   .sec-head h1 { font-size:26px }
   .modal { padding:20px 16px }
-  /* iOS Safari auto-zooms on focus when the focused field's font-size is
-     under 16px — bump it up on mobile only, desktop keeps the 14px look */
-  input[type=text],input[type=date],input[type=number],textarea,select { font-size:16px }
+  /* filter tabs scroll horizontally instead of overflowing the viewport */
+  .ftabs { width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none }
+  .ftabs::-webkit-scrollbar { display:none }
+  .ftab { flex-shrink:0 }
 }
 @media(max-width:360px) { .bnav-btn { font-size:8px } }
+
+/* iOS Safari auto-zooms on focus when a field's font-size is under 16px, and
+   never zooms back out. Keying off a coarse pointer (any touch device) instead
+   of a width breakpoint covers every phone/tablet and every input type, while
+   desktop keeps the tighter 14px look. */
+@media (pointer: coarse) {
+  input[type=text],input[type=email],input[type=password],input[type=search],
+  input[type=tel],input[type=url],input[type=number],input[type=date],
+  textarea,select { font-size:16px }
+}

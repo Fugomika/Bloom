@@ -9,6 +9,9 @@ const calName = ref('')
 const calKcal = ref('')
 const calType = ref('breakfast')
 
+const showGoalModal = ref(false)
+const goalDraft = ref('')
+
 const meals = computed(() => todayMeals())
 const kcal  = computed(() => meals.value.reduce((s, m) => s + m.cal, 0))
 const goal  = computed(() => DB.settings.calorieGoal)
@@ -32,10 +35,11 @@ function saveMeal() {
   closeModal()
 }
 function delMeal(id) { storeDeleteMeal(id) }
-function editGoal() {
-  const v = prompt(`Daily calorie goal (current: ${goal.value} kcal):`, goal.value)
-  const n = parseInt(v)
+function openGoalModal() { goalDraft.value = String(goal.value); showGoalModal.value = true }
+function saveGoal() {
+  const n = parseInt(goalDraft.value)
   if (n && n > 0 && n < 10000) saveSettings({ calorieGoal: n })
+  showGoalModal.value = false
 }
 
 const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
@@ -66,7 +70,7 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
             <span class="ccip" :class="remain >= 0 ? 'ccip-remain' : 'ccip-over'">
               {{ remain >= 0 ? `${remain.toLocaleString()} left` : `${Math.abs(remain).toLocaleString()} over!` }}
             </span>
-            <span class="ccip ccip-goal" @click="editGoal">Goal: {{ goal.toLocaleString() }} kcal</span>
+            <span class="ccip ccip-goal" @click="openGoalModal">Goal: {{ goal.toLocaleString() }} kcal ✏️</span>
           </div>
         </div>
       </div>
@@ -116,6 +120,22 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
         </div>
       </div>
     </div>
+
+    <!-- Daily Goal Modal -->
+    <div class="overlay" :class="{ open: showGoalModal }" @click.self="showGoalModal = false"
+      @keydown="e => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveGoal() }">
+      <div class="modal" style="max-width:380px">
+        <div class="modal-head">Daily Calorie Goal</div>
+        <div class="fg" style="margin-bottom:4px">
+          <label>Goal (kcal)</label>
+          <input type="number" v-model="goalDraft" placeholder="2000" min="1" max="9999" @keydown.enter="saveGoal"/>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" @click="showGoalModal = false">Cancel</button>
+          <button class="btn btn-leaf" @click="saveGoal">Save Goal</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -143,8 +163,10 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
 }
 .meal-name { flex:1; font-weight:700; font-size:13px }
 .meal-cal { font-family:'Fredoka One',cursive; font-size:14px; color:var(--sun-dk) }
-.meal-del { opacity:0; border:none; background:none; cursor:pointer; font-size:12px; color:var(--muted); padding:3px 5px; border-radius:5px; transition:all .15s }
+.meal-del { opacity:0; border:none; background:none; cursor:pointer; font-size:12px; color:var(--muted); padding:8px; border-radius:7px; transition:all .15s; flex-shrink:0 }
 .meal-item:hover .meal-del { opacity:1 }
 .meal-del:hover { background:#FEE2E2; color:#DC2626 }
+/* touch devices have no hover — keep delete visible so meals stay deletable */
+@media (hover: none) { .meal-del { opacity:.55 } }
 @media(max-width:600px) { .cal-top { flex-direction:column; align-items:flex-start } }
 </style>

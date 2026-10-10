@@ -190,10 +190,13 @@ function saveCalendar() {
   }
   closeCalModal()
 }
-function delCalendar(id) {
-  if (!confirm('Delete this calendar and all its events?')) return
+const confirmDelCalId = ref(null)
+function askDelCalendar(id) { confirmDelCalId.value = id }
+function executeDelCalendar() {
+  const id = confirmDelCalId.value
   if (activeCalId.value === id) activeCalId.value = null
   storeDeleteCalendar(id)
+  confirmDelCalId.value = null
 }
 
 // ── Event modal ─────────────────────────────────────────────
@@ -272,7 +275,7 @@ const calYearRange = computed(() => {
             </div>
             <div class="cl-acts" @click.stop>
               <button class="evt-act" @click="openCalModal(cal.id)"><AppIcon name="pencil" :size="13" /></button>
-              <button class="evt-act del" @click="delCalendar(cal.id)"><AppIcon name="trash" :size="13" /></button>
+              <button class="evt-act del" @click="askDelCalendar(cal.id)"><AppIcon name="trash" :size="13" /></button>
             </div>
           </div>
           <div class="life-progress-bar" style="margin:10px 0 5px"><div class="life-progress-fill" :style="`width:${calProgress(cal)}%`"></div></div>
@@ -413,7 +416,7 @@ const calYearRange = computed(() => {
         </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" @click="closeCalModal">Cancel</button>
-          <button v-if="editCalId" class="btn btn-ghost" style="color:#DC2626" @click="delCalendar(editCalId); closeCalModal()"><AppIcon name="trash" :size="13" /> Delete</button>
+          <button v-if="editCalId" class="btn btn-ghost" style="color:#DC2626" @click="askDelCalendar(editCalId); closeCalModal()"><AppIcon name="trash" :size="13" /> Delete</button>
           <button class="btn btn-sun" @click="saveCalendar">Save</button>
         </div>
       </div>
@@ -470,6 +473,20 @@ const calYearRange = computed(() => {
           <button class="btn btn-ghost" @click="closeEvtModal">Cancel</button>
           <button v-if="editEvtId" class="btn btn-ghost" style="color:#DC2626" @click="delEvtFromModal"><AppIcon name="trash" :size="13" /> Delete</button>
           <button class="btn btn-sun" @click="saveEvent">Save Event</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELETE CALENDAR CONFIRM -->
+    <div class="overlay" :class="{ open: confirmDelCalId }" @click.self="confirmDelCalId = null">
+      <div class="modal" style="max-width:380px">
+        <div class="modal-head">Delete calendar?</div>
+        <p style="font-size:13px;font-weight:700;color:var(--muted);margin:-6px 0 16px">
+          This removes the calendar and all its events. This can't be undone.
+        </p>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" @click="confirmDelCalId = null">Cancel</button>
+          <button class="btn btn-red" @click="executeDelCalendar"><AppIcon name="trash" :size="13" /> Delete</button>
         </div>
       </div>
     </div>

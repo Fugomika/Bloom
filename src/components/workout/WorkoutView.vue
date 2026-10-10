@@ -157,7 +157,8 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
 .wex-del:hover { background:rgba(239,68,68,.2) }
 .add-ex-btn { width:100%; padding:9px; border:2px dashed rgba(0,0,0,.12); border-radius:var(--r-xs); background:none; cursor:pointer; font-family:'Nunito',sans-serif; font-weight:800; font-size:13px; color:var(--muted); transition:all .18s; margin-bottom:10px }
 .add-ex-btn:hover { border-color:var(--red); color:var(--red); background:var(--red-lt) }
-@media(max-width:600px) {
+/* 16px keeps iOS from auto-zooming these fields on focus (any touch device) */
+@media (pointer: coarse) {
   .wex-top input, .wex-bot input { font-size:16px }
 }
 </style>
