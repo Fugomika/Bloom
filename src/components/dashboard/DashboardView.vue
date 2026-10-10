@@ -191,6 +191,8 @@ function qHabit(id) {
   .dash-grid  { grid-template-columns:1fr }
 }
 @media(max-width:600px) {
+  .greeting { font-size:25px }
+  .greeting-sub { font-size:13px; margin-bottom:18px }
   .stats-row { grid-template-columns:1fr 1fr; gap:9px }
   .dash-grid  { grid-template-columns:1fr; gap:12px }
 }

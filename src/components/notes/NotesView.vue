@@ -44,7 +44,7 @@ function noteDate(n) { const d = new Date(n.at); return `${MONTHS[d.getMonth()]}
 <template>
   <div>
     <div class="sec-head"><h1>My Notes</h1><p>Capture every thought</p></div>
-    <div style="margin-bottom:18px"><button class="btn btn-sun" @click="openModal()">＋ New Note</button></div>
+    <div style="margin-bottom:18px"><button class="btn btn-sun btn-block" @click="openModal()">＋ New Note</button></div>
 
     <div class="notes-grid">
       <template v-if="sorted.length">

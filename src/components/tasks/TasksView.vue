@@ -75,7 +75,7 @@ const EMPTY = {
           </div>
         </div>
       </div>
-      <button class="btn btn-sun" @click="addTask">＋ Add Task</button>
+      <button class="btn btn-sun btn-block" @click="addTask">＋ Add Task</button>
     </div>
 
     <div class="ftabs">

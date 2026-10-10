@@ -74,7 +74,7 @@ const ORDER = ['breakfast', 'lunch', 'dinner', 'snack']
           </div>
         </div>
       </div>
-      <button class="btn btn-leaf" @click="openModal">＋ Log Food</button>
+      <button class="btn btn-leaf btn-block" @click="openModal">＋ Log Food</button>
     </div>
 
     <div v-if="!meals.length" class="empty">

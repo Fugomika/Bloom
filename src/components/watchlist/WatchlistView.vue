@@ -565,6 +565,9 @@ function startWatching() {
 .wlp-pop-enter-from   { opacity:0; transform:scale(.94) translateY(8px) }
 .wlp-pop-leave-to     { opacity:0; transform:scale(1.03) }
 
+@media (max-width: 600px) {
+  .wl-top-row .btn, .wl-pick-btn { flex:1; justify-content:center; padding:13px 14px; font-size:14px }
+}
 @media (max-width: 480px) {
   .wl-banner { padding:12px }
   .wl-banner-title { font-size:13px }

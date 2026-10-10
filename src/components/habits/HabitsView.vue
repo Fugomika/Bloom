@@ -54,7 +54,7 @@ const w = last7()
         <label>Emoji</label>
         <EmojiPicker :emojis="EMOJIS" v-model="selEmoji" variant="habit" />
       </div>
-      <button class="btn btn-sun" @click="addHabit">＋ Add Habit</button>
+      <button class="btn btn-sun btn-block" @click="addHabit">＋ Add Habit</button>
     </div>
 
     <div class="habits-grid">

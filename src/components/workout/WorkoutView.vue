@@ -44,7 +44,7 @@ function wktDate(w) { const d = new Date(w.at); return `${MONTHS[d.getMonth()]} 
   <div>
     <div class="sec-head"><h1>Workout Log</h1><p>Track every rep, every mile</p></div>
     <div class="wkt-top">
-      <button class="btn btn-red" @click="openModal">＋ Log Workout</button>
+      <button class="btn btn-red btn-block" @click="openModal">＋ Log Workout</button>
       <span style="font-size:13px;font-weight:800;color:var(--muted)">
         {{ todayCt ? `${todayCt} workout${todayCt > 1 ? 's' : ''} logged today` : 'No workouts logged today' }}
       </span>

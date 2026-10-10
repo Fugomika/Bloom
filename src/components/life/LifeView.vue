@@ -260,7 +260,7 @@ const calYearRange = computed(() => {
     <!-- CALENDAR LIST -->
     <div v-if="!activeCalId">
       <div style="margin-bottom:20px">
-        <button class="btn btn-sun" @click="openCalModal()">＋ New Calendar</button>
+        <button class="btn btn-sun btn-block" @click="openCalModal()">＋ New Calendar</button>
       </div>
       <div v-if="!cals.length" class="empty" style="padding:56px 20px">
         <span class="ee">📅</span><h3>No calendars yet</h3><p>Create one to start visualizing your time</p>

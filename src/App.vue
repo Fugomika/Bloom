@@ -6,6 +6,7 @@ import { activeSection, go } from './composables/useNavigation.js'
 import LoginView    from './components/auth/LoginView.vue'
 import BloomLogo    from './components/ui/BloomLogo.vue'
 import AppSidebar   from './components/layout/AppSidebar.vue'
+import AppTopBar    from './components/layout/AppTopBar.vue'
 import AppBottomNav from './components/layout/AppBottomNav.vue'
 import DashboardView from './components/dashboard/DashboardView.vue'
 import TasksView    from './components/tasks/TasksView.vue'
@@ -58,6 +59,7 @@ async function handleSignOut() {
   <!-- App -->
   <template v-else>
     <AppSidebar :active="activeSection" @navigate="go" @signout="handleSignOut" />
+    <AppTopBar />
     <main class="main">
       <DashboardView :class="['section', activeSection === 'dashboard' ? 'active' : '']" />
       <TasksView     :class="['section', activeSection === 'tasks'     ? 'active' : '']" />

@@ -443,7 +443,9 @@ const EMPTY_MSG = {
 }
 @media(max-width:600px) {
   .fin-stats { grid-template-columns:1fr; gap:9px }
-  .fin-budget-btn { margin-left:0 }
+  /* income + expense split the first row; budget spans full width below */
+  .fin-top-row > .btn-leaf, .fin-top-row > .btn-red { flex:1; justify-content:center; padding:13px 14px; font-size:14px }
+  .fin-budget-btn { flex:1 0 100%; margin-left:0; justify-content:center; padding:12px 14px }
   .fin-cat-grid { grid-template-columns:repeat(3,1fr) }
   .fin-item { padding:10px 12px; gap:10px }
   .fin-amount { font-size:13px }
