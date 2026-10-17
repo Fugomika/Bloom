@@ -8,7 +8,7 @@ import AppIcon from '../ui/AppIcon.vue'
 const TITLES = {
   dashboard: 'Dashboard', tasks: 'Tasks', habits: 'Habits',
   calories: 'Calories', workout: 'Workout', notes: 'Notes',
-  life: 'Life', watchlist: 'Watchlist', finance: 'Finance',
+  life: 'Life', watchlist: 'Watchlist', finance: 'Finance', wardrobe: 'Wardrobe',
 }
 const title = computed(() => TITLES[activeSection.value] || 'Bloom')
 

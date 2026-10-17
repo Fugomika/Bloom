@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { user } from './useAuth.js'
 import { today } from '../utils/date.js'
 
-export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance']
+export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance', 'wardrobe']
 export const MOBILE_NAV_MAX = 3
 const DEFAULT_MOBILE_NAV = ['tasks', 'habits', 'calories']
 
@@ -16,6 +16,8 @@ export const DB = reactive({
   lifeCalendars: [],
   watchlist: [],
   finance: [],
+  wardrobe: [],
+  outfits: [],
   settings: { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] },
 })
 
@@ -35,7 +37,7 @@ export async function load() {
   if (!userId) return
   loading.value = true
 
-  const [tasks, habits, notes, meals, workouts, calendars, watchlist, finance, settingsRes] = await Promise.all([
+  const [tasks, habits, notes, meals, workouts, calendars, watchlist, finance, wardrobe, outfits, settingsRes] = await Promise.all([
     supabase.from('tasks').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('habits').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('notes').select('*').eq('user_id', userId).order('at', { ascending: false }),
@@ -44,6 +46,8 @@ export async function load() {
     supabase.from('life_calendars').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
     supabase.from('watchlist').select('*').eq('user_id', userId).order('pri', { ascending: true }),
     supabase.from('finance_transactions').select('*').eq('user_id', userId).order('date', { ascending: false }),
+    supabase.from('wardrobe_items').select('*').eq('user_id', userId).order('at', { ascending: false }),
+    supabase.from('wardrobe_outfits').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('settings').select('*').eq('user_id', userId).maybeSingle(),
   ])
 
@@ -74,6 +78,9 @@ export async function load() {
 
   DB.finance = finance.data || []
 
+  DB.wardrobe = (wardrobe.data || []).map(x => ({ ...x, colors: x.colors || [], seasons: x.seasons || [], tags: x.tags || [] }))
+  DB.outfits  = (outfits.data || []).map(o => ({ ...o, item_ids: o.item_ids || [], tags: o.tags || [] }))
+
   if (settingsRes.data) {
     DB.settings.calorieGoal      = settingsRes.data.calorie_goal
     DB.settings.financeBudgets   = settingsRes.data.finance_budgets || {}
@@ -97,6 +104,9 @@ export function reset() {
   DB.lifeCalendars = []
   DB.watchlist = []
   DB.finance = []
+  DB.wardrobe = []
+  DB.outfits = []
+  for (const k in imageUrls) delete imageUrls[k]
   DB.settings = { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] }
   loading.value = true
 }
@@ -256,6 +266,84 @@ export function updateTransaction(id, updates) {
 export function deleteTransaction(id) {
   DB.finance = DB.finance.filter(x => x.id !== id)
   dbRun(supabase.from('finance_transactions').delete().eq('id', id).eq('user_id', uid()))
+}
+
+// ── Wardrobe ───────────────────────────────────────────────────
+const WARDROBE_BUCKET = 'wardrobe'
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7   // seconds
+
+// path -> { url, exp }. Signed URLs for the private bucket, refreshed before they expire.
+export const imageUrls = reactive({})
+
+export async function ensureImageUrls(paths) {
+  const now = Date.now()
+  const need = [...new Set(paths.filter(p => p && !(imageUrls[p]?.exp > now)))]
+  if (!need.length) return
+  const { data, error } = await supabase.storage.from(WARDROBE_BUCKET).createSignedUrls(need, SIGNED_URL_TTL)
+  if (error) { console.error('[Bloom] Storage error:', error); return }
+  const exp = now + (SIGNED_URL_TTL - 3600) * 1000
+  for (const r of data || []) if (r.signedUrl) imageUrls[r.path] = { url: r.signedUrl, exp }
+}
+
+export async function uploadItemImage(itemId, blob) {
+  const path = `${uid()}/${itemId}-${Date.now()}.webp`
+  const { error } = await supabase.storage.from(WARDROBE_BUCKET)
+    .upload(path, blob, { contentType: blob.type || 'image/webp', upsert: true })
+  if (error) throw error
+  await ensureImageUrls([path])
+  return path
+}
+
+export function removeItemImage(path) {
+  if (!path) return
+  delete imageUrls[path]
+  dbRun(supabase.storage.from(WARDROBE_BUCKET).remove([path]))
+}
+
+export function addWardrobeItem(item) {
+  DB.wardrobe.unshift(item)
+  dbRun(supabase.from('wardrobe_items').insert({ ...item, user_id: uid() }))
+}
+
+export function updateWardrobeItem(id, updates) {
+  const item = DB.wardrobe.find(x => x.id === id)
+  if (item) Object.assign(item, updates)
+  dbRun(supabase.from('wardrobe_items').update(updates).eq('id', id).eq('user_id', uid()))
+}
+
+export function archiveWardrobeItem(id, reason) {
+  updateWardrobeItem(id, { status: 'archived', archive_reason: reason, archived_at: Date.now() })
+}
+
+export function restoreWardrobeItem(id) {
+  updateWardrobeItem(id, { status: 'active', archive_reason: '', archived_at: null })
+}
+
+export function deleteWardrobeItem(id) {
+  const item = DB.wardrobe.find(x => x.id === id)
+  if (item?.image_path) removeItemImage(item.image_path)
+  DB.wardrobe = DB.wardrobe.filter(x => x.id !== id)
+  dbRun(supabase.from('wardrobe_items').delete().eq('id', id).eq('user_id', uid()))
+  // Drop the item from any outfit that used it
+  for (const o of DB.outfits) {
+    if (o.item_ids.includes(id)) updateOutfit(o.id, { item_ids: o.item_ids.filter(x => x !== id) })
+  }
+}
+
+export function addOutfit(outfit) {
+  DB.outfits.unshift(outfit)
+  dbRun(supabase.from('wardrobe_outfits').insert({ ...outfit, user_id: uid() }))
+}
+
+export function updateOutfit(id, updates) {
+  const o = DB.outfits.find(x => x.id === id)
+  if (o) Object.assign(o, updates)
+  dbRun(supabase.from('wardrobe_outfits').update(updates).eq('id', id).eq('user_id', uid()))
+}
+
+export function deleteOutfit(id) {
+  DB.outfits = DB.outfits.filter(x => x.id !== id)
+  dbRun(supabase.from('wardrobe_outfits').delete().eq('id', id).eq('user_id', uid()))
 }
 
 // ── Helpers ────────────────────────────────────────────────────

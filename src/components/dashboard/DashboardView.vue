@@ -2,9 +2,11 @@
 import { computed } from 'vue'
 import { DB, todayKcal, updateTask, updateHabitIns } from '../../composables/useStore.js'
 import { streak, today, thisYM, fmtIDR } from '../../utils/date.js'
-import { MONTHS, DAYS } from '../../utils/constants.js'
+import { MONTHS, DAYS, WARDROBE_CATEGORIES } from '../../utils/constants.js'
+import { go } from '../../composables/useNavigation.js'
 import { confetti } from '../../composables/useConfetti.js'
 import AppIcon from '../ui/AppIcon.vue'
+import OutfitCollage from '../wardrobe/OutfitCollage.vue'
 
 const now = new Date()
 const h = now.getHours()
@@ -32,6 +34,23 @@ const finThisMonth  = computed(() => DB.finance.filter(t => t.date.slice(0, 7) =
 const finIncome     = computed(() => finThisMonth.value.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0))
 const finExpense    = computed(() => finThisMonth.value.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0))
 const finBalance    = computed(() => DB.finance.reduce((s, t) => s + (t.type === 'income' ? t.amount : -t.amount), 0))
+
+const showWardrobe  = computed(() => DB.settings.visibleSections.includes('wardrobe'))
+const wrActive      = computed(() => DB.wardrobe.filter(i => i.status !== 'archived'))
+const wrTopCats     = computed(() =>
+  WARDROBE_CATEGORIES
+    .map(c => ({ ...c, count: wrActive.value.filter(i => i.category === c.key).length }))
+    .filter(c => c.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3))
+// Rotates daily through favourites (or all outfits) so the pick is stable within a day
+const wrOutfitPick  = computed(() => {
+  const favs = DB.outfits.filter(o => o.favorite && o.item_ids.length)
+  const pool = favs.length ? favs : DB.outfits.filter(o => o.item_ids.length)
+  if (!pool.length) return null
+  const day = Math.floor(Date.now() / 86400000)
+  return pool[day % pool.length]
+})
 
 function qToggle(id) {
   const task = DB.tasks.find(x => x.id === id)
@@ -135,6 +154,24 @@ function qHabit(id) {
         </div>
       </div>
 
+      <!-- Wardrobe -->
+      <div v-if="showWardrobe" class="card wr-dash" @click="go('wardrobe')">
+        <div class="widget-title">Lemari</div>
+        <div class="wr-dash-row">
+          <div class="wr-dash-stats">
+            <div class="wr-dash-n">{{ wrActive.length }}<small> item</small></div>
+            <div v-for="c in wrTopCats" :key="c.key" class="wr-dash-cat">
+              <span>{{ c.icon }} {{ c.label }}</span><b>{{ c.count }}</b>
+            </div>
+            <div v-if="!wrActive.length" class="wr-dash-empty">Belum ada item — tap untuk mulai</div>
+          </div>
+          <div v-if="wrOutfitPick" class="wr-dash-outfit">
+            <div class="wr-dash-collage"><OutfitCollage :item-ids="wrOutfitPick.item_ids" /></div>
+            <div class="wr-dash-oname">{{ wrOutfitPick.favorite ? '★ ' : '' }}{{ wrOutfitPick.name }}</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Recent Notes -->
       <div class="card dash-full">
         <div class="widget-title">Recent Notes</div>
@@ -186,6 +223,17 @@ function qHabit(id) {
 .fin-mini-balance { font-size:12px; font-weight:800; text-align:center; padding:6px 0 0 }
 .fin-mini-pos { color:var(--leaf-dk) }
 .fin-mini-neg { color:#DC2626 }
+
+.wr-dash { cursor:pointer }
+.wr-dash-row { display:flex; gap:14px; align-items:flex-start }
+.wr-dash-stats { flex:1; min-width:0; display:flex; flex-direction:column; gap:6px }
+.wr-dash-n { font-family:'Fredoka One',cursive; font-size:30px; line-height:1; color:#BE185D; margin-bottom:4px }
+.wr-dash-n small { font-size:14px; color:var(--muted) }
+.wr-dash-cat { display:flex; justify-content:space-between; font-size:12px; font-weight:800; background:var(--bg); border-radius:var(--r-xs); padding:6px 10px }
+.wr-dash-empty { font-size:12px; font-weight:700; color:var(--muted) }
+.wr-dash-outfit { width:112px; flex-shrink:0 }
+.wr-dash-collage { aspect-ratio:1; border-radius:var(--r-sm); overflow:hidden }
+.wr-dash-oname { font-size:11px; font-weight:800; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center }
 @media(max-width:960px) {
   .stats-row { grid-template-columns:1fr 1fr }
   .dash-grid  { grid-template-columns:1fr }

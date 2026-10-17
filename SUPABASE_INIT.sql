@@ -85,12 +85,44 @@ CREATE TABLE finance_transactions (
   at       BIGINT NOT NULL
 );
 
+CREATE TABLE wardrobe_items (
+  id             TEXT PRIMARY KEY,
+  user_id        UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name           TEXT NOT NULL DEFAULT '',
+  category       TEXT NOT NULL DEFAULT 'other',
+  colors         TEXT[] DEFAULT '{}',
+  brand          TEXT DEFAULT '',
+  size           TEXT DEFAULT '',
+  seasons        TEXT[] DEFAULT '{}',
+  tags           TEXT[] DEFAULT '{}',
+  price          NUMERIC DEFAULT 0,
+  bought_date    TEXT DEFAULT '',
+  image_path     TEXT DEFAULT '',
+  note           TEXT DEFAULT '',
+  status         TEXT NOT NULL DEFAULT 'active',
+  archive_reason TEXT DEFAULT '',
+  archived_at    BIGINT,
+  finance_tx_id  TEXT,
+  at             BIGINT NOT NULL
+);
+
+CREATE TABLE wardrobe_outfits (
+  id       TEXT PRIMARY KEY,
+  user_id  UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name     TEXT NOT NULL DEFAULT '',
+  item_ids TEXT[] DEFAULT '{}',
+  tags     TEXT[] DEFAULT '{}',
+  note     TEXT DEFAULT '',
+  favorite BOOLEAN DEFAULT false,
+  at       BIGINT NOT NULL
+);
+
 -- One row per user — stores calorie goal, finance budgets, and which sections are visible
 CREATE TABLE settings (
   user_id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   calorie_goal        INTEGER DEFAULT 2000,
   finance_budgets     JSONB   DEFAULT '{}',
-  visible_sections    TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','finance'],
+  visible_sections    TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','finance','wardrobe'],
   mobile_nav_sections TEXT[]  DEFAULT ARRAY['tasks','habits','calories']
 );
 
@@ -104,6 +136,8 @@ ALTER TABLE workouts       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE life_calendars ENABLE ROW LEVEL SECURITY;
 ALTER TABLE watchlist      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE finance_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wardrobe_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wardrobe_outfits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings       ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "own tasks"       ON tasks          FOR ALL USING (auth.uid() = user_id);
@@ -114,4 +148,19 @@ CREATE POLICY "own workouts"    ON workouts       FOR ALL USING (auth.uid() = us
 CREATE POLICY "own calendars"   ON life_calendars FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own watchlist"   ON watchlist      FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own finance_transactions" ON finance_transactions FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own wardrobe_items" ON wardrobe_items FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own wardrobe_outfits" ON wardrobe_outfits FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own settings"    ON settings       FOR ALL USING (auth.uid() = user_id);
+
+-- ── Wardrobe photo storage (private bucket, path = {uid}/...) ─────
+
+INSERT INTO storage.buckets (id, name, public) VALUES ('wardrobe', 'wardrobe', false) ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "wardrobe own select" ON storage.objects FOR SELECT
+  USING (bucket_id = 'wardrobe' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "wardrobe own insert" ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'wardrobe' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "wardrobe own update" ON storage.objects FOR UPDATE
+  USING (bucket_id = 'wardrobe' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "wardrobe own delete" ON storage.objects FOR DELETE
+  USING (bucket_id = 'wardrobe' AND auth.uid()::text = (storage.foldername(name))[1]);
