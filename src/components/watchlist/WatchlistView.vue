@@ -207,10 +207,10 @@ function startWatching() {
     <div class="wl-list" :class="{ 'wl-list-card': viewMode === 'card' }">
       <template v-if="filtered.length">
         <div v-for="item in filtered" :key="item.id"
-             class="wl-card" :class="`wl-${item.status}`">
+             class="wl-card" :class="`wl-${item.status}`" @click="openEdit(item)">
           <div class="wl-type-icon">{{ item.type === 'movie' ? '🎬' : '📺' }}</div>
 
-          <div class="wl-body" @click="openEdit(item)">
+          <div class="wl-body">
             <div class="wl-title">{{ item.title }}</div>
             <div class="wl-meta">
               <span class="wl-badge-type">{{ item.type === 'movie' ? 'Movie' : 'Series' }}</span>
@@ -228,7 +228,7 @@ function startWatching() {
           <div class="wl-actions">
             <!-- Inline delete confirmation -->
             <template v-if="deleteConfirmId === item.id">
-              <div class="wl-confirm">
+              <div class="wl-confirm" @click.stop>
                 <span class="wl-confirm-text">Hapus?</span>
                 <button class="wl-confirm-yes" @click.stop="executeDelete(item.id)">Hapus</button>
                 <button class="wl-confirm-no"  @click.stop="cancelDelete()">Batal</button>
@@ -236,7 +236,7 @@ function startWatching() {
             </template>
 
             <template v-else>
-              <div v-if="item.status === 'queued'" class="wl-arrows">
+              <div v-if="item.status === 'queued'" class="wl-arrows" @click.stop>
                 <button class="wl-arr" @click.stop="moveUp(item)"   title="Naikkan urutan">{{ viewMode === 'card' ? '◀' : '▲' }}</button>
                 <button class="wl-arr" @click.stop="moveDown(item)" title="Turunkan urutan">{{ viewMode === 'card' ? '▶' : '▼' }}</button>
               </div>
@@ -408,7 +408,7 @@ function startWatching() {
   display:flex; align-items:center; gap:12px;
   background:var(--surface); border-radius:var(--r); padding:14px 16px;
   border:2px solid var(--border); transition:all .2s;
-  animation:fadeUp .2s ease; position:relative;
+  animation:fadeUp .2s ease; position:relative; cursor:pointer;
 }
 .wl-card:hover { box-shadow:var(--sh); border-color:var(--sun) }
 .wl-watching   { border-left:4px solid #F59E0B }
@@ -420,7 +420,7 @@ function startWatching() {
   background:var(--bg); display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
 
-.wl-body  { flex:1; cursor:pointer; min-width:0 }
+.wl-body  { flex:1; min-width:0 }
 .wl-title {
   font-family:'Fredoka One',cursive; font-size:16px; color:var(--text);
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px;

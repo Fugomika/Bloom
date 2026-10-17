@@ -203,11 +203,11 @@ const EMPTY_MSG = {
               </span>
             </div>
 
-            <div v-for="t in txs" :key="t.id" class="fin-item">
+            <div v-for="t in txs" :key="t.id" class="fin-item" @click="openEdit(t)">
               <div class="fin-icon" :style="`background:${catInfo(t.category).color}22;color:${catInfo(t.category).color}`">
                 {{ catInfo(t.category).icon }}
               </div>
-              <div class="fin-body" @click="openEdit(t)">
+              <div class="fin-body">
                 <div class="fin-cat">{{ catInfo(t.category).label }}</div>
                 <div v-if="t.note" class="fin-note">{{ t.note }}</div>
               </div>
@@ -216,7 +216,7 @@ const EMPTY_MSG = {
               </div>
 
               <template v-if="deleteConfirmId === t.id">
-                <div class="fin-confirm">
+                <div class="fin-confirm" @click.stop>
                   <button class="fin-confirm-yes" @click.stop="executeDelete(t.id)">Hapus</button>
                   <button class="fin-confirm-no"  @click.stop="cancelDelete()">Batal</button>
                 </div>
@@ -366,14 +366,14 @@ const EMPTY_MSG = {
 .fin-item {
   display:flex; align-items:center; gap:12px;
   background:var(--surface); border-radius:var(--r-sm); padding:11px 14px;
-  box-shadow:var(--sh); transition:all .18s; animation:fadeUp .2s ease; position:relative;
+  box-shadow:var(--sh); transition:all .18s; animation:fadeUp .2s ease; position:relative; cursor:pointer;
 }
 @media (hover:hover) and (pointer:fine) {
   .fin-item:hover { transform:translateX(2px) }
 }
 
 .fin-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0 }
-.fin-body { flex:1; min-width:0; cursor:pointer }
+.fin-body { flex:1; min-width:0 }
 .fin-cat  { font-weight:800; font-size:13px }
 .fin-note { font-size:11px; font-weight:700; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 .fin-amount { font-family:'Fredoka One',cursive; font-size:14px; flex-shrink:0 }
