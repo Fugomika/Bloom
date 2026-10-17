@@ -117,12 +117,44 @@ CREATE TABLE wardrobe_outfits (
   at       BIGINT NOT NULL
 );
 
+CREATE TABLE books (
+  id             TEXT PRIMARY KEY,
+  user_id        UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title          TEXT NOT NULL DEFAULT '',
+  author         TEXT DEFAULT '',
+  cover_url      TEXT DEFAULT '',
+  source_key     TEXT DEFAULT '',
+  isbn           TEXT DEFAULT '',
+  pages          INTEGER DEFAULT 0,
+  published_year INTEGER,
+  genres         TEXT[] DEFAULT '{}',
+  status         TEXT NOT NULL DEFAULT 'want',
+  rating         INTEGER DEFAULT 0,
+  review         TEXT DEFAULT '',
+  started_at     TEXT DEFAULT '',
+  finished_at    TEXT DEFAULT '',
+  owned          BOOLEAN DEFAULT false,
+  format         TEXT DEFAULT 'physical',
+  location       TEXT DEFAULT '',
+  lent_to        TEXT DEFAULT '',
+  quotes         JSONB DEFAULT '[]',
+  at             BIGINT NOT NULL
+);
+
+-- One row per user per year
+CREATE TABLE reading_goals (
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  year    INTEGER NOT NULL,
+  target  INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (user_id, year)
+);
+
 -- One row per user — stores calorie goal, finance budgets, and which sections are visible
 CREATE TABLE settings (
   user_id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   calorie_goal        INTEGER DEFAULT 2000,
   finance_budgets     JSONB   DEFAULT '{}',
-  visible_sections    TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','finance','wardrobe'],
+  visible_sections    TEXT[]  DEFAULT ARRAY['tasks','habits','calories','workout','notes','life','watchlist','finance','wardrobe','books'],
   mobile_nav_sections TEXT[]  DEFAULT ARRAY['tasks','habits','calories']
 );
 
@@ -138,6 +170,8 @@ ALTER TABLE watchlist      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE finance_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wardrobe_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wardrobe_outfits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE books ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reading_goals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE settings       ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "own tasks"       ON tasks          FOR ALL USING (auth.uid() = user_id);
@@ -150,6 +184,8 @@ CREATE POLICY "own watchlist"   ON watchlist      FOR ALL USING (auth.uid() = us
 CREATE POLICY "own finance_transactions" ON finance_transactions FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own wardrobe_items" ON wardrobe_items FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own wardrobe_outfits" ON wardrobe_outfits FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own books" ON books FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "own reading_goals" ON reading_goals FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "own settings"    ON settings       FOR ALL USING (auth.uid() = user_id);
 
 -- ── Wardrobe photo storage (private bucket, path = {uid}/...) ─────

@@ -18,6 +18,7 @@ const NAV_META = {
   watchlist: { icon: 'clapperboard', label: 'Watch' },
   finance:   { icon: 'wallet',       label: 'Finance' },
   wardrobe:  { icon: 'shirt',        label: 'Wardrobe' },
+  books:     { icon: 'book',         label: 'Books' },
 }
 
 const showDrawer = ref(false)

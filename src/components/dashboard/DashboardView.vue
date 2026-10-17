@@ -7,6 +7,7 @@ import { go } from '../../composables/useNavigation.js'
 import { confetti } from '../../composables/useConfetti.js'
 import AppIcon from '../ui/AppIcon.vue'
 import OutfitCollage from '../wardrobe/OutfitCollage.vue'
+import BookCover from '../books/BookCover.vue'
 
 const now = new Date()
 const h = now.getHours()
@@ -51,6 +52,12 @@ const wrOutfitPick  = computed(() => {
   const day = Math.floor(Date.now() / 86400000)
   return pool[day % pool.length]
 })
+
+const showBooks     = computed(() => DB.settings.visibleSections.includes('books'))
+const bkReading     = computed(() => DB.books.filter(b => b.status === 'reading').slice(0, 3))
+const bkYear        = now.getFullYear()
+const bkDone        = computed(() => DB.books.filter(b => b.status === 'done' && b.finished_at?.startsWith(String(bkYear))).length)
+const bkGoal        = computed(() => DB.readingGoals[bkYear] || 0)
 
 function qToggle(id) {
   const task = DB.tasks.find(x => x.id === id)
@@ -172,6 +179,25 @@ function qHabit(id) {
         </div>
       </div>
 
+      <!-- Books -->
+      <div v-if="showBooks" class="card bk-dash" @click="go('books')">
+        <div class="widget-title">Sedang Dibaca</div>
+        <div v-if="bkReading.length" class="bk-dash-list">
+          <div v-for="b in bkReading" :key="b.id" class="bk-dash-book">
+            <div class="bk-dash-cover"><BookCover :book="b" /></div>
+            <div class="bk-dash-title">{{ b.title }}</div>
+          </div>
+        </div>
+        <div v-else class="wr-dash-empty">Belum ada buku yang dibaca — tap untuk pilih</div>
+        <div class="bk-dash-goal">
+          <div class="bk-dash-goal-lbl">
+            <span>Target {{ bkYear }}</span>
+            <b>{{ bkDone }}{{ bkGoal ? ` / ${bkGoal}` : '' }} buku</b>
+          </div>
+          <div v-if="bkGoal" class="bk-dash-track"><div class="bk-dash-fill" :style="`width:${Math.min(100, bkDone / bkGoal * 100)}%`"></div></div>
+        </div>
+      </div>
+
       <!-- Recent Notes -->
       <div class="card dash-full">
         <div class="widget-title">Recent Notes</div>
@@ -223,6 +249,17 @@ function qHabit(id) {
 .fin-mini-balance { font-size:12px; font-weight:800; text-align:center; padding:6px 0 0 }
 .fin-mini-pos { color:var(--leaf-dk) }
 .fin-mini-neg { color:#DC2626 }
+
+.bk-dash { cursor:pointer }
+.bk-dash-list { display:flex; gap:12px; margin-bottom:12px }
+.bk-dash-book { width:76px; min-width:0 }
+.bk-dash-cover { aspect-ratio:2/3; border-radius:6px; overflow:hidden; box-shadow:var(--sh) }
+.bk-dash-title { font-size:10.5px; font-weight:800; margin-top:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.2 }
+.bk-dash-goal { margin-top:10px }
+.bk-dash-goal-lbl { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:var(--muted); margin-bottom:6px }
+.bk-dash-goal-lbl b { color:var(--text) }
+.bk-dash-track { height:8px; border-radius:8px; background:rgba(0,0,0,.06); overflow:hidden }
+.bk-dash-fill { height:100%; background:var(--purple); border-radius:8px }
 
 .wr-dash { cursor:pointer }
 .wr-dash-row { display:flex; gap:14px; align-items:flex-start }

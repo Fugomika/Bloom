@@ -74,3 +74,21 @@ export const WARDROBE_SEASONS = [
   { key: 'dry',   label: 'Kemarau', icon: '☀️' },
   { key: 'rainy', label: 'Hujan',   icon: '🌧️' },
 ]
+
+export const BOOK_STATUSES = [
+  { key: 'reading', label: 'Sedang Baca', icon: '📖', color: '#F59E0B' },
+  { key: 'want',    label: 'Mau Baca',    icon: '🔖', color: '#3B82F6' },
+  { key: 'done',    label: 'Selesai',     icon: '✅', color: '#22C55E' },
+  { key: 'dnf',     label: 'Berhenti',    icon: '⏸️', color: '#94A3B8' },
+]
+
+export const BOOK_FORMATS = [
+  { key: 'physical',  label: 'Fisik',     icon: '📚' },
+  { key: 'ebook',     label: 'Ebook',     icon: '📱' },
+  { key: 'audiobook', label: 'Audiobook', icon: '🎧' },
+]
+
+export const BOOK_GENRES = [
+  'Fiksi', 'Non-fiksi', 'Self-improvement', 'Bisnis', 'Psikologi', 'Sejarah', 'Sains',
+  'Fantasi', 'Romance', 'Misteri/Thriller', 'Biografi', 'Agama', 'Komik/Manga', 'Puisi', 'Lainnya',
+]

@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { user } from './useAuth.js'
 import { today } from '../utils/date.js'
 
-export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance', 'wardrobe']
+export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance', 'wardrobe', 'books']
 export const MOBILE_NAV_MAX = 3
 const DEFAULT_MOBILE_NAV = ['tasks', 'habits', 'calories']
 
@@ -18,6 +18,8 @@ export const DB = reactive({
   finance: [],
   wardrobe: [],
   outfits: [],
+  books: [],
+  readingGoals: {},
   settings: { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] },
 })
 
@@ -37,7 +39,7 @@ export async function load() {
   if (!userId) return
   loading.value = true
 
-  const [tasks, habits, notes, meals, workouts, calendars, watchlist, finance, wardrobe, outfits, settingsRes] = await Promise.all([
+  const [tasks, habits, notes, meals, workouts, calendars, watchlist, finance, wardrobe, outfits, books, goals, settingsRes] = await Promise.all([
     supabase.from('tasks').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('habits').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('notes').select('*').eq('user_id', userId).order('at', { ascending: false }),
@@ -48,6 +50,8 @@ export async function load() {
     supabase.from('finance_transactions').select('*').eq('user_id', userId).order('date', { ascending: false }),
     supabase.from('wardrobe_items').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('wardrobe_outfits').select('*').eq('user_id', userId).order('at', { ascending: false }),
+    supabase.from('books').select('*').eq('user_id', userId).order('at', { ascending: false }),
+    supabase.from('reading_goals').select('*').eq('user_id', userId),
     supabase.from('settings').select('*').eq('user_id', userId).maybeSingle(),
   ])
 
@@ -81,6 +85,9 @@ export async function load() {
   DB.wardrobe = (wardrobe.data || []).map(x => ({ ...x, colors: x.colors || [], seasons: x.seasons || [], tags: x.tags || [] }))
   DB.outfits  = (outfits.data || []).map(o => ({ ...o, item_ids: o.item_ids || [], tags: o.tags || [] }))
 
+  DB.books = (books.data || []).map(b => ({ ...b, genres: b.genres || [], quotes: b.quotes || [] }))
+  DB.readingGoals = Object.fromEntries((goals.data || []).map(g => [g.year, g.target]))
+
   if (settingsRes.data) {
     DB.settings.calorieGoal      = settingsRes.data.calorie_goal
     DB.settings.financeBudgets   = settingsRes.data.finance_budgets || {}
@@ -106,6 +113,8 @@ export function reset() {
   DB.finance = []
   DB.wardrobe = []
   DB.outfits = []
+  DB.books = []
+  DB.readingGoals = {}
   for (const k in imageUrls) delete imageUrls[k]
   DB.settings = { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] }
   loading.value = true
@@ -344,6 +353,28 @@ export function updateOutfit(id, updates) {
 export function deleteOutfit(id) {
   DB.outfits = DB.outfits.filter(x => x.id !== id)
   dbRun(supabase.from('wardrobe_outfits').delete().eq('id', id).eq('user_id', uid()))
+}
+
+// ── Books ──────────────────────────────────────────────────────
+export function addBook(book) {
+  DB.books.unshift(book)
+  dbRun(supabase.from('books').insert({ ...book, user_id: uid() }))
+}
+
+export function updateBook(id, updates) {
+  const b = DB.books.find(x => x.id === id)
+  if (b) Object.assign(b, updates)
+  dbRun(supabase.from('books').update(updates).eq('id', id).eq('user_id', uid()))
+}
+
+export function deleteBook(id) {
+  DB.books = DB.books.filter(x => x.id !== id)
+  dbRun(supabase.from('books').delete().eq('id', id).eq('user_id', uid()))
+}
+
+export function setReadingGoal(year, target) {
+  DB.readingGoals[year] = target
+  dbRun(supabase.from('reading_goals').upsert({ user_id: uid(), year, target }))
 }
 
 // ── Helpers ────────────────────────────────────────────────────

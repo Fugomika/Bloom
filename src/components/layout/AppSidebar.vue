@@ -26,6 +26,7 @@ const ALL_NAV = [
   { s: 'watchlist', icon: 'clapperboard', label: 'Watchlist' },
   { s: 'finance',   icon: 'wallet',       label: 'Finance' },
   { s: 'wardrobe',  icon: 'shirt',        label: 'Wardrobe' },
+  { s: 'books',     icon: 'book',         label: 'Books' },
 ]
 
 const NAV = computed(() =>
@@ -84,6 +85,7 @@ const NAV = computed(() =>
 .nav-btn[data-s="watchlist"] .nav-icon { background:linear-gradient(135deg,#EC4899,#DB2777) }
 .nav-btn[data-s="finance"]   .nav-icon { background:linear-gradient(135deg,#22C55E,#15803D) }
 .nav-btn[data-s="wardrobe"]  .nav-icon { background:linear-gradient(135deg,#EC4899,#BE185D) }
+.nav-btn[data-s="books"]     .nav-icon { background:linear-gradient(135deg,#8B5CF6,#6D28D9) }
 .sidebar-foot { margin-top:auto; padding:10px; display:flex; flex-direction:column; gap:6px }
 .foot-btn { width:100%; display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--r-sm); border:none; background:none; cursor:pointer; color:rgba(255,255,255,.38); font-family:'Nunito',sans-serif; font-size:13.5px; font-weight:700; text-align:left; transition:all .18s }
 .foot-btn:hover { background:var(--sidebar-hover); color:rgba(255,255,255,.7) }

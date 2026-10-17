@@ -2,6 +2,8 @@
 -- After running this, run SUPABASE_INIT.sql to recreate from scratch.
 
 DROP TABLE IF EXISTS food_spots;
+DROP TABLE IF EXISTS reading_goals;
+DROP TABLE IF EXISTS books;
 DROP TABLE IF EXISTS wardrobe_outfits;
 DROP TABLE IF EXISTS wardrobe_items;
 DROP TABLE IF EXISTS finance_transactions;

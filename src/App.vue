@@ -18,6 +18,7 @@ import LifeView       from './components/life/LifeView.vue'
 import WatchlistView  from './components/watchlist/WatchlistView.vue'
 import FinanceView    from './components/finance/FinanceView.vue'
 import WardrobeView   from './components/wardrobe/WardrobeView.vue'
+import BooksView      from './components/books/BooksView.vue'
 
 onMounted(async () => {
   await initAuth()
@@ -72,6 +73,7 @@ async function handleSignOut() {
       <WatchlistView    :class="['section', activeSection === 'watchlist' ? 'active' : '']" />
       <FinanceView      :class="['section', activeSection === 'finance'   ? 'active' : '']" />
       <WardrobeView     :class="['section', activeSection === 'wardrobe'  ? 'active' : '']" />
+      <BooksView        :class="['section', activeSection === 'books'     ? 'active' : '']" />
     </main>
     <AppBottomNav :active="activeSection" @navigate="go" @signout="handleSignOut" />
   </template>

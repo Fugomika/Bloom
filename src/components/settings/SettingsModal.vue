@@ -17,6 +17,7 @@ const SECTION_META = {
   watchlist: { icon: 'clapperboard', label: 'Watchlist', grad: 'linear-gradient(135deg,#EC4899,#DB2777)' },
   finance:   { icon: 'wallet',       label: 'Finance',   grad: 'linear-gradient(135deg,#22C55E,#15803D)' },
   wardrobe:  { icon: 'shirt',        label: 'Wardrobe',  grad: 'linear-gradient(135deg,#EC4899,#BE185D)' },
+  books:     { icon: 'book',         label: 'Books',     grad: 'linear-gradient(135deg,#8B5CF6,#6D28D9)' },
 }
 
 const sections = computed(() => ALL_SECTIONS.map(s => ({
