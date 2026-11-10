@@ -27,6 +27,19 @@ Semua record lama disalin ke Cloudflare dalam mode **DNS only** (awan abu-abu):
 - `albasita` CNAME dan TXT `asuid.albasita` → Azure App Service (Albasita Office).
 - `bloom` dibuat otomatis waktu custom domain dipasang di Worker.
 
+## Site lain yang ikut pindah (dari GitHub Pages)
+Rencananya repo-repo ini mau dijadikan private, dan GitHub Pages gratis nggak bisa serve dari repo private.
+Jadi semuanya sekarang dilayani Cloudflare Worker, dan GitHub Pages di ketiga repo sudah dimatikan:
+
+| Domain | Worker | Repo | Catatan |
+|---|---|---|---|
+| `fugomika.dev`, `www` | `portfolio` | `Fugomika/portfolio` | Next.js static export → `out/`, `deploy.yml` dihapus |
+| `makan-apa.fugomika.dev` | `makan-apa` | `Fugomika/makan-apa` | HTML statis dari root |
+| `cireng-enin.fugomika.dev` | `cireng-enin` | `Fugomika/cireng-enin` | HTML statis dari root |
+
+Repo yang di-serve dari root punya `.assetsignore` supaya `CLAUDE.md`, `claude_notes/`, `.git`, dan file
+sejenis nggak ikut ke-publish. Ini penting karena isi repo private bisa kebuka kalau file-file itu ikut di-serve.
+
 ## Hal yang perlu diingat
 - Variabel `VITE_*` di-*inline* ke bundle **waktu build**, bukan dibaca saat runtime. Karena itu harus diisi
   di *Build* variables, bukan di Worker runtime variables. Kalau kosong, gejalanya layar blank dan error
