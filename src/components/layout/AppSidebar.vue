@@ -19,7 +19,7 @@ const ALL_NAV = [
   { s: 'dashboard', icon: 'home',         label: 'Dashboard' },
   { s: 'tasks',     icon: 'tasks',        label: 'Tasks' },
   { s: 'habits',    icon: 'flame',        label: 'Habits' },
-  { s: 'calories',  icon: 'apple',        label: 'Calories' },
+  { s: 'calories',  icon: 'apple',        label: 'Diet' },
   { s: 'workout',   icon: 'activity',     label: 'Workout' },
   { s: 'notes',     icon: 'note',         label: 'Notes' },
   { s: 'life',      icon: 'calendar',     label: 'Life' },

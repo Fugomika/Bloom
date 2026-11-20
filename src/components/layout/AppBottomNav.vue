@@ -11,7 +11,7 @@ const NAV_META = {
   dashboard: { icon: 'home',         label: 'Home' },
   tasks:     { icon: 'tasks',        label: 'Tasks' },
   habits:    { icon: 'flame',        label: 'Habits' },
-  calories:  { icon: 'apple',        label: 'Calories' },
+  calories:  { icon: 'apple',        label: 'Diet' },
   workout:   { icon: 'activity',     label: 'Workout' },
   notes:     { icon: 'note',         label: 'Notes' },
   life:      { icon: 'calendar',     label: 'Life' },

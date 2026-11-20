@@ -11,7 +11,7 @@ import AppBottomNav from './components/layout/AppBottomNav.vue'
 import DashboardView from './components/dashboard/DashboardView.vue'
 import TasksView    from './components/tasks/TasksView.vue'
 import HabitsView   from './components/habits/HabitsView.vue'
-import CaloriesView from './components/calories/CaloriesView.vue'
+import DietView     from './components/diet/DietView.vue'
 import WorkoutView  from './components/workout/WorkoutView.vue'
 import NotesView      from './components/notes/NotesView.vue'
 import LifeView       from './components/life/LifeView.vue'
@@ -66,7 +66,7 @@ async function handleSignOut() {
       <DashboardView :class="['section', activeSection === 'dashboard' ? 'active' : '']" />
       <TasksView     :class="['section', activeSection === 'tasks'     ? 'active' : '']" />
       <HabitsView    :class="['section', activeSection === 'habits'    ? 'active' : '']" />
-      <CaloriesView  :class="['section', activeSection === 'calories'  ? 'active' : '']" />
+      <DietView      :class="['section', activeSection === 'calories'  ? 'active' : '']" />
       <WorkoutView   :class="['section', activeSection === 'workout'   ? 'active' : '']" />
       <NotesView     :class="['section', activeSection === 'notes'     ? 'active' : '']" />
       <LifeView         :class="['section', activeSection === 'life'      ? 'active' : '']" />

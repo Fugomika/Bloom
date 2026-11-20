@@ -1,17 +1,20 @@
 import { reactive, ref } from 'vue'
 import { supabase } from '../lib/supabase.js'
 import { user } from './useAuth.js'
-import { today } from '../utils/date.js'
+import { localDate } from '../utils/date.js'
 
 export const ALL_SECTIONS = ['tasks', 'habits', 'calories', 'workout', 'notes', 'life', 'watchlist', 'finance', 'wardrobe', 'books']
 export const MOBILE_NAV_MAX = 3
 const DEFAULT_MOBILE_NAV = ['tasks', 'habits', 'calories']
+const DEFAULT_DIET_TARGETS = { carb: 5, protein: 80, fried: 2, weight: null }
 
 export const DB = reactive({
   tasks: [],
   habits: [],
   notes: [],
-  meals: {},
+  meals: [],
+  bodyLogs: [],
+  partner: null,
   workouts: [],
   lifeCalendars: [],
   watchlist: [],
@@ -20,7 +23,7 @@ export const DB = reactive({
   outfits: [],
   books: [],
   readingGoals: {},
-  settings: { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] },
+  settings: { calorieGoal: 2000, dietTargets: { ...DEFAULT_DIET_TARGETS }, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] },
 })
 
 export const loading = ref(true)
@@ -39,11 +42,14 @@ export async function load() {
   if (!userId) return
   loading.value = true
 
-  const [tasks, habits, notes, meals, workouts, calendars, watchlist, finance, wardrobe, outfits, books, goals, settingsRes] = await Promise.all([
+  const [tasks, habits, notes, meals, bodyLogs, partnerRes, workouts, calendars, watchlist, finance, wardrobe, outfits, books, goals, settingsRes] = await Promise.all([
     supabase.from('tasks').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('habits').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('notes').select('*').eq('user_id', userId).order('at', { ascending: false }),
-    supabase.from('meals').select('*').eq('user_id', userId),
+    // meals and body_logs are not filtered by user: RLS returns my rows plus my partner's
+    supabase.from('meals').select('*'),
+    supabase.from('body_logs').select('*'),
+    supabase.from('partners').select('*').eq('user_id', userId).maybeSingle(),
     supabase.from('workouts').select('*').eq('user_id', userId).order('at', { ascending: false }),
     supabase.from('life_calendars').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
     supabase.from('watchlist').select('*').eq('user_id', userId).order('pri', { ascending: true }),
@@ -59,10 +65,19 @@ export async function load() {
   DB.habits = habits.data || []
   DB.notes = notes.data || []
 
-  DB.meals = {}
-  for (const m of (meals.data || [])) {
-    if (!DB.meals[m.date]) DB.meals[m.date] = []
-    DB.meals[m.date].push(m)
+  DB.meals = meals.data || []
+  DB.bodyLogs = bodyLogs.data || []
+
+  DB.partner = null
+  if (partnerRes.data) {
+    const p = partnerRes.data
+    const { data: ps } = await supabase.from('settings').select('calorie_goal, diet_targets').eq('user_id', p.partner_id).maybeSingle()
+    DB.partner = {
+      id: p.partner_id,
+      name: p.partner_name || 'Pasangan',
+      calorieGoal: ps?.calorie_goal || 2000,
+      dietTargets: { ...DEFAULT_DIET_TARGETS, ...(ps?.diet_targets || {}) },
+    }
   }
 
   DB.workouts = (workouts.data || []).map(w => ({ ...w, exercises: w.exercises || [] }))
@@ -90,6 +105,7 @@ export async function load() {
 
   if (settingsRes.data) {
     DB.settings.calorieGoal      = settingsRes.data.calorie_goal
+    DB.settings.dietTargets      = { ...DEFAULT_DIET_TARGETS, ...(settingsRes.data.diet_targets || {}) }
     DB.settings.financeBudgets   = settingsRes.data.finance_budgets || {}
     DB.settings.visibleSections  = settingsRes.data.visible_sections?.filter(s => s !== 'food') || [...ALL_SECTIONS]
     DB.settings.mobileNavSections = settingsRes.data.mobile_nav_sections || [...DEFAULT_MOBILE_NAV]
@@ -106,7 +122,9 @@ export function reset() {
   DB.tasks = []
   DB.habits = []
   DB.notes = []
-  DB.meals = {}
+  DB.meals = []
+  DB.bodyLogs = []
+  DB.partner = null
   DB.workouts = []
   DB.lifeCalendars = []
   DB.watchlist = []
@@ -116,7 +134,7 @@ export function reset() {
   DB.books = []
   DB.readingGoals = {}
   for (const k in imageUrls) delete imageUrls[k]
-  DB.settings = { calorieGoal: 2000, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] }
+  DB.settings = { calorieGoal: 2000, dietTargets: { ...DEFAULT_DIET_TARGETS }, financeBudgets: {}, visibleSections: [...ALL_SECTIONS], mobileNavSections: [...DEFAULT_MOBILE_NAV] }
   loading.value = true
 }
 
@@ -167,24 +185,53 @@ export function deleteNote(id) {
   dbRun(supabase.from('notes').delete().eq('id', id).eq('user_id', uid()))
 }
 
-// ── Meals ──────────────────────────────────────────────────────
+// ── Diet (meals + body logs) ───────────────────────────────────
+// Rows carry their own user_id (mine or my partner's), so these do not filter
+// by uid() — RLS decides what each of us may touch.
 export function addMeal(meal) {
-  const t = today()
-  if (!DB.meals[t]) DB.meals[t] = []
-  DB.meals[t].push(meal)
-  dbRun(supabase.from('meals').insert({ ...meal, date: t, user_id: uid() }))
+  DB.meals.push(meal)
+  dbRun(supabase.from('meals').insert(meal))
+}
+
+export function updateMeal(id, updates) {
+  const m = DB.meals.find(x => x.id === id)
+  if (m) Object.assign(m, updates)
+  dbRun(supabase.from('meals').update(updates).eq('id', id))
 }
 
 export function deleteMeal(id) {
-  const t = today()
-  if (DB.meals[t]) DB.meals[t] = DB.meals[t].filter(m => m.id !== id)
-  dbRun(supabase.from('meals').delete().eq('id', id).eq('user_id', uid()))
+  const m = DB.meals.find(x => x.id === id)
+  if (m?.image_path) removeItemImage(m.image_path)
+  DB.meals = DB.meals.filter(x => x.id !== id)
+  dbRun(supabase.from('meals').delete().eq('id', id))
+}
+
+export async function uploadMealImage(ownerId, mealId, blob) {
+  const path = `${ownerId}/meals/${mealId}-${Date.now()}.webp`
+  const { error } = await supabase.storage.from(WARDROBE_BUCKET)
+    .upload(path, blob, { contentType: blob.type || 'image/webp' })
+  if (error) throw error
+  await ensureImageUrls([path])
+  return path
+}
+
+export function saveBodyLog(log) {
+  const idx = DB.bodyLogs.findIndex(x => x.id === log.id)
+  if (idx >= 0) DB.bodyLogs[idx] = log
+  else DB.bodyLogs.push(log)
+  dbRun(supabase.from('body_logs').upsert(log))
+}
+
+export function deleteBodyLog(id) {
+  DB.bodyLogs = DB.bodyLogs.filter(x => x.id !== id)
+  dbRun(supabase.from('body_logs').delete().eq('id', id))
 }
 
 export async function saveSettings(settings) {
   Object.assign(DB.settings, settings)
   await supabase.from('settings').update({
     calorie_goal:        DB.settings.calorieGoal,
+    diet_targets:        DB.settings.dietTargets,
     finance_budgets:     DB.settings.financeBudgets,
     visible_sections:    DB.settings.visibleSections,
     mobile_nav_sections: DB.settings.mobileNavSections,
@@ -378,10 +425,9 @@ export function setReadingGoal(year, target) {
 }
 
 // ── Helpers ────────────────────────────────────────────────────
-export function todayMeals() {
-  return DB.meals[today()] || []
-}
+export function myId() { return uid() }
 
 export function todayKcal() {
-  return todayMeals().reduce((s, m) => s + m.cal, 0)
+  const t = localDate()
+  return DB.meals.filter(m => m.user_id === uid() && m.date === t).reduce((s, m) => s + (m.cal || 0), 0)
 }

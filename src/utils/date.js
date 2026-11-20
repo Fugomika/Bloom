@@ -8,6 +8,12 @@ export function today() {
   return new Date().toISOString().split('T')[0]
 }
 
+// today() above is the UTC date, which is still "yesterday" until 07:00 in WIB.
+// The diet log needs the date on the wall clock.
+export function localDate(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function fmtDate(d) {
   if (!d) return ''
   const dt = new Date(d + 'T00:00:00')

@@ -10,7 +10,7 @@ const emit = defineEmits(['close'])
 const SECTION_META = {
   tasks:     { icon: 'tasks',        label: 'Tasks',     grad: 'linear-gradient(135deg,#10B981,#059669)' },
   habits:    { icon: 'flame',        label: 'Habits',    grad: 'linear-gradient(135deg,#F97316,#EA580C)' },
-  calories:  { icon: 'apple',        label: 'Calories',  grad: 'linear-gradient(135deg,#84CC16,#22C55E)' },
+  calories:  { icon: 'apple',        label: 'Diet',      grad: 'linear-gradient(135deg,#84CC16,#22C55E)' },
   workout:   { icon: 'activity',     label: 'Workout',   grad: 'linear-gradient(135deg,#EF4444,#DC2626)' },
   notes:     { icon: 'note',         label: 'Notes',     grad: 'linear-gradient(135deg,#8B5CF6,#7C3AED)' },
   life:      { icon: 'calendar',     label: 'Life',      grad: 'linear-gradient(135deg,#34D399,#818CF8)' },
