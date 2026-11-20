@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bloom",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Only /api/* runs the Worker; every other request is served straight from dist
+    "run_worker_first": ["/api/*"]
+  },
+  "routes": [{ "pattern": "bloom.fugomika.dev", "custom_domain": true }],
+  "workers_dev": true,
+  // Public values (already shipped in the frontend bundle). ANTHROPIC_API_KEY is a secret:
+  // `npx wrangler secret put ANTHROPIC_API_KEY`, or .dev.vars for local `wrangler dev`.
+  "vars": {
+    "SUPABASE_URL": "https://iiagrugnjsgerxqintka.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpYWdydWduanNnZXJ4cWludGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NTk0MTAsImV4cCI6MjA5NzMzNTQxMH0.c5MfBLUl0FDUp0JfLmSPbUA9O8d2QY0MysO2yqUBDwY"
+  },
+  "observability": { "enabled": true }
+}

@@ -72,6 +72,8 @@ Di sisi klien, query `meals` dan `body_logs` di `load()` sengaja tidak difilter 
 
 ## Yang sengaja belum dibuat
 
-- Estimasi kalori otomatis dari teks atau foto (butuh API AI dan backend kecil).
+(Perkiraan gizi dengan AI sudah ada, lihat `ai-estimate.md`.)
+
+
 - Durasi dan jarak di Workout, serta target mingguan (jalan 7×, beban 3×).
 - Sinkronisasi realtime: kalau dia menambah entri, baru terlihat setelah halaman dimuat ulang.

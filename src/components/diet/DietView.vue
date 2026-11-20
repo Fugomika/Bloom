@@ -6,6 +6,7 @@ import {
 } from '../../composables/useStore.js'
 import { uid, localDate } from '../../utils/date.js'
 import { resizeImage } from '../../utils/image.js'
+import { supabase } from '../../lib/supabase.js'
 
 const tab = ref('food')
 const who = ref('me')
@@ -137,8 +138,9 @@ function openEdit(m) {
   setPreview(edPreview, null)
   confirmDel.value = false
   error.value = ''
+  resetAi()
 }
-function closeEdit() { ed.value = null; setPreview(edPreview, null) }
+function closeEdit() { ed.value = null; setPreview(edPreview, null); resetAi() }
 async function onEditFile(e) {
   const b = await readPhoto(e)
   if (!b || !ed.value) return
@@ -150,6 +152,56 @@ const edPhotoUrl = computed(() => {
   if (!ed.value) return ''
   return edPreview.value || (ed.value.keepPhoto ? imageUrls[ed.value.oldPath]?.url || '' : '')
 })
+
+// ── AI estimate ────────────────────────────────────────────────
+const aiBusy = ref(false)
+const aiNote = ref('')
+const aiConf = ref('')
+const aiError = ref('')
+function resetAi() { aiBusy.value = false; aiNote.value = ''; aiConf.value = ''; aiError.value = '' }
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(String(r.result).split(',')[1])
+    r.onerror = reject
+    r.readAsDataURL(blob)
+  })
+}
+
+async function aiEstimate() {
+  const e = ed.value
+  if (!e || aiBusy.value) return
+  const id = e.id
+  aiBusy.value = true
+  aiError.value = ''
+  aiNote.value = ''
+  try {
+    let blob = e.blob
+    if (!blob && e.keepPhoto && imageUrls[e.oldPath]?.url) blob = await (await fetch(imageUrls[e.oldPath].url)).blob()
+    const { data: { session } } = await supabase.auth.getSession()
+    const res = await fetch('/api/estimate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${session?.access_token || ''}` },
+      body: JSON.stringify({
+        text: e.name,
+        image: blob ? { media_type: blob.type || 'image/webp', data: await blobToBase64(blob) } : undefined,
+      }),
+    })
+    const data = await res.json().catch(() => ({}))
+    // the sheet may have been closed or switched to another entry while waiting
+    if (ed.value?.id !== id) return
+    if (!res.ok) { aiError.value = data.error || 'Perkiraan AI gagal, coba lagi.'; return }
+    Object.assign(ed.value, { cal: String(data.cal), carb: String(data.carb), protein: String(data.protein), fried: String(data.fried) })
+    aiNote.value = data.note
+    aiConf.value = data.confidence
+  } catch (err) {
+    console.error('[Bloom] AI estimate failed:', err)
+    if (ed.value?.id === id) aiError.value = 'Tidak bisa menghubungi server. Cek koneksi.'
+  } finally {
+    if (ed.value?.id === id) aiBusy.value = false
+  }
+}
 
 async function saveEdit() {
   const e = ed.value
@@ -404,6 +456,16 @@ function saveTargets() {
           <div class="fg"><label>Protein (g)</label><input type="number" inputmode="decimal" v-model="ed.protein" placeholder="—" /></div>
           <div class="fg"><label>Gorengan (buah)</label><input type="number" inputmode="numeric" v-model="ed.fried" placeholder="0" /></div>
         </div>
+        <div class="ai-row">
+          <button class="btn btn-ghost ai-btn" :disabled="aiBusy || (!ed.name.trim() && !edPhotoUrl)" @click="aiEstimate">
+            ✨ {{ aiBusy ? 'Menghitung…' : 'Perkirakan dengan AI' }}
+          </button>
+        </div>
+        <div v-if="aiNote" class="ai-note">
+          <b>Perkiraan AI{{ aiConf === 'low' ? ', kurang yakin' : '' }}.</b> {{ aiNote }}
+          <span class="ai-hint">Angkanya sudah diisi di atas. Cek dulu, lalu Simpan.</span>
+        </div>
+        <div v-if="aiError" class="err" style="margin:-4px 0 12px">{{ aiError }}</div>
         <details class="cheat">
           <summary>Contekan porsi (catatan dietisien 3 Nov)</summary>
           <ul>
@@ -511,6 +573,11 @@ input[type=time] {
 .row-del:hover { background:#FEE2E2; color:#DC2626; opacity:1 }
 
 .nums .fg { min-width:calc(50% - 5px) }
+.ai-row { margin-bottom:12px }
+.ai-btn { width:100%; justify-content:center; background:var(--purple-lt); color:#6D28D9 }
+.ai-btn:hover:not(:disabled) { background:#DDD6FE; color:#5B21B6 }
+.ai-note { font-size:13px; font-weight:700; line-height:1.5; background:var(--purple-lt); color:#4C1D95; border-radius:var(--r-sm); padding:10px 12px; margin-bottom:12px }
+.ai-hint { display:block; margin-top:4px; font-size:12px; color:#6D28D9 }
 .cheat { font-size:13px; font-weight:700; color:var(--muted); margin-bottom:14px }
 .cheat summary { cursor:pointer; font-weight:900 }
 .cheat ul { margin:8px 0 0 18px; line-height:1.6 }
